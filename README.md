@@ -7,6 +7,7 @@ Invite bot to server through link
 
 In the *.env* file add 
 DISCORD_BOT_TOKEN=\<DISCORD_BOT_TOKEN\>
+ADMIN_ROLE_ID=\<ADMIN_ROLE_ID\>
 
 ### Running the bot
 ```
