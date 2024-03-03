@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  discord-bot:
+    build: .
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    restart: no
