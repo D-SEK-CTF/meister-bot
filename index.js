@@ -9,7 +9,7 @@ const client = new Client({
   ],
 });
 const prefix = "meister";
-const adminRoleID = process.env.ADMIN_ROLE_ID
+const adminRoleID = process.env.ADMIN_ROLE_ID;
 
 client.once("ready", () => {
   console.log("Meister is ready!");
@@ -22,15 +22,15 @@ Testing
 Creating new ctfs:
   meister new ctf <CTF-NAME>
   mesiter new chall <CHALL-NAME>
-`
-const hasRoleId = (message,id)=>{
+`;
+const hasRoleId = (message, id) => {
   const member = message.member;
-  if (member.roles.cache.some(role => role.id === id)) {
-    return true
-  }else{
-    return false
+  if (member.roles.cache.some((role) => role.id === id)) {
+    return true;
+  } else {
+    return false;
   }
-}
+};
 
 client.on("messageCreate", (message) => {
   // Ignore messages from other bots
@@ -43,56 +43,75 @@ client.on("messageCreate", (message) => {
     const command = args.shift().toLowerCase();
 
     // Help
-    if (command == "" || command == "help"){
-      message.channel.send(helpMsg)
+    if (command == "" || command == "help") {
+      message.reply(helpMsg);
     }
-    if (command == "testrole"){
-      const userName = message.member.user.globalName
-      if (hasRoleId(message,adminRoleID)){
-        message.channel.send("User " + userName + " is allowed")
-      }else{
-        message.channel.send("User " +userName + " is NOT allowed")
+
+    if (command == "testrole") {
+      const userName = message.member.user.username;
+      if (hasRoleId(message, adminRoleID)) {
+        message.reply("User " + userName + " is allowed");
+      } else {
+        message.reply("User " + userName + " is NOT allowed");
       }
     }
+
     // Check the command
-    if (command === "new" && hasRoleId(message,adminRoleID)) {
+    if (command === "new" && hasRoleId(message, adminRoleID)) {
       const subCommand = args.shift().toLowerCase();
       if (subCommand === "ctf") {
         // Create a new category
         const categoryName = args.join(" ");
+
+        if (categoryName === "") {
+          message.channel.send("Please specify a name for the CTF.");
+          return;
+        }
+
         message.guild.channels
           .create({
             name: categoryName,
             type: ChannelType.GuildCategory,
           })
-          .then((e) => {
-            message.guild.channels.create({
-              name: categoryName,
-              type: ChannelType.GuildText,
-              parent: e.id,
-            });
+          .then((category) => {
+            message.guild.channels
+              .create({
+                name: categoryName,
+                type: ChannelType.GuildText,
+                parent: category.id,
+              })
+              .then((textChannel) => {
+                // Send a message to the channel
+                message.reply(`New CTF <#${textChannel.id}> created.`);
+              });
             message.guild.channels.create({
               name: categoryName,
               type: ChannelType.GuildVoice,
-              parent: e.id,
+              parent: category.id,
             });
           });
-        message.channel.send(`New CTF '${categoryName}' created.`);
-      } else if (subCommand === "chall" && hasRoleId(message,adminRoleID)) {
+      } else if (subCommand === "chall" && hasRoleId(message, adminRoleID)) {
         // Create a new channel inside the specified category
+        if (args.length === 0) {
+          message.reply("Please specify a name for the challenge.");
+        }
         const channelName = args.join(" ");
         const category = message.channel.parent;
         if (category && category.type === ChannelType.GuildCategory) {
-          message.guild.channels.create({
-            name: channelName,
-            type: ChannelType.GuildText,
-            parent: category,
-          });
-          message.channel.send(
-            `New channel '${channelName}' created inside '${category.name}'.`
-          );
+          message.guild.channels
+            .create({
+              name: channelName,
+              type: ChannelType.GuildText,
+              parent: category.id,
+            })
+            .then((newChannel) => {
+              // Now mentioning the newly created channel inside the specified category
+              message.channel.send(
+                `New channel <#${newChannel.id}> created inside ${category.name}.`
+              );
+            });
         } else {
-          message.channel.send("Please use this command inside a category.");
+          message.reply("Please use this command inside a category.");
         }
       }
     } else if (command === "solved") {
@@ -100,7 +119,7 @@ client.on("messageCreate", (message) => {
       const solvedString = args.join(" ");
       const newChannelName = `${message.channel.name} ✅`;
       message.channel.setName(newChannelName);
-      message.channel.send(`Challenge solved: \`${solvedString}\``);
+      message.reply(`Challenge solved: \`${solvedString}\``);
     }
   }
 });
