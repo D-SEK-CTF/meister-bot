@@ -1,10 +1,10 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import HelpCommand from './commands/HelpCommand';
-import NewChallCommand from './commands/NewChallCommand';
+import { Searcher } from 'fast-fuzzy';
 import NewCTFCommand from './commands/NewCTFCommand';
+import NewChallCommand from './commands/NewChallCommand';
 import SolvedCommand from './commands/SolvedCommand';
 import TestRoleCommand from './commands/TestRoleCommand';
-import BaseCommand from './commands/BaseCommand';
+import { adminRoleID, botToken, prefix } from './const';
 
 const client = new Client({
   intents: [
@@ -13,10 +13,6 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
-
-const adminRoleID: string | undefined = process.env.ADMIN_ROLE_ID;
-const botToken: string | undefined = process.env.DISCORD_BOT_TOKEN;
-const prefix: string = process.env.PREFIX ?? 'meister';
 
 if (!adminRoleID) {
   console.error('ADMIN_ROLE_ID is not defined in your environment variables.');
@@ -30,39 +26,46 @@ client.once('ready', () => {
   console.log('Meister is ready!');
 });
 
-interface CommandMap {
-  [key: string]: BaseCommand;
-}
-
-const commands: CommandMap = {
-  help: new HelpCommand(client),
-  "new chall": new NewChallCommand(client, adminRoleID),
-  "new ctf": new NewCTFCommand(client, adminRoleID),
-  solved: new SolvedCommand(client),
-  testrole: new TestRoleCommand(client, adminRoleID),
-};
+const commands = [
+  new NewChallCommand(client, adminRoleID),
+  new NewCTFCommand(client, adminRoleID),
+  new SolvedCommand(client),
+  new TestRoleCommand(client, adminRoleID),
+];
+const commandNames = commands.map((command) => command.commandName);
+const helpCommands = commands.map((command) => command.usageHelp);
 
 client.on('messageCreate', (message) => {
   if (message.author.bot) return;
+  if (!message.content.startsWith(prefix)) return;
+  if (!message.inGuild()) return;
 
-  if (message.content.startsWith(prefix)) {
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const commandName = args.shift()?.toLowerCase() ?? '';
+  const botCommand = message.content.slice(prefix.length).trim().toLocaleLowerCase();
 
-    const command = commands[commandName];
-    if (command) {
+  // Exact matching with early return
+  for (const command of Object.values(commands)) {
+    if (botCommand.startsWith(command.commandName)) {
+      console.log(`Executing command: ${command.commandName}`);
+      const args = botCommand.slice(command.commandName.length).trim().split(/ +/);
       command.execute(message, args);
-    } else {
-      const similarCommands = Object.keys(commands).filter((cmd) =>
-        cmd.includes(commandName)
-      );
-      if (similarCommands.length > 0) {
-        message.reply(`Did you mean ${similarCommands.join(", ")}?`);
-      } else {
-        message.reply("I don't understand that command.");
-      }
+      return;
     }
   }
+
+  // Help command
+  if (botCommand === 'help') {
+    message.reply(`Available commands: \`${helpCommands.join('\`, \`')}\`.\n\nType \`${prefix} help <command>\` for more info.`);
+    return;
+  }
+
+  // Fuzzy matching
+  const searcher = new Searcher(Object.keys(commands));
+  const matches = searcher.search(botCommand);
+  let response = 'Invalid command.';
+  if (matches.length > 0) {
+    response += ` Did you mean: \`${matches.join('\`, \`')}\`?`;
+  }
+  message.reply(response);
 });
 
 client.login(botToken).catch(console.error);

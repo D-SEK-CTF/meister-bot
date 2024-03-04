@@ -2,14 +2,14 @@ import { Client, Message } from 'discord.js';
 
 abstract class BaseCommand {
   client: Client;
-  prefix: string;
+  abstract commandName: string;
+  abstract usageHelp: string;
 
   constructor(client: Client) {
     if (new.target === BaseCommand) {
       throw new TypeError("Cannot construct BaseCommand instances directly");
     }
     this.client = client;
-    this.prefix = "meister";
   }
 
   abstract execute(message: Message, args: string[]): void;

@@ -1,9 +1,11 @@
-// Assuming Command.ts exports BaseCommand class correctly.
+import { prefix } from "../const";
 import BaseCommand from "./BaseCommand";
 import { ChannelType, Message } from "discord.js";
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;
+  commandName = "new chall";
+  usageHelp = `${prefix} ${this.commandName} <CHALL-NAME>`
 
   constructor(client: any, adminRoleId: string) {
     super(client);

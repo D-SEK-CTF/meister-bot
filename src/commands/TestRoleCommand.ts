@@ -1,8 +1,11 @@
 import { Message } from 'discord.js';
 import BaseCommand from './BaseCommand';
+import { prefix } from '../const';
 
 class TestRoleCommand extends BaseCommand {
   private adminRoleId: string;
+  commandName = 'testrole';
+  usageHelp = `${prefix} ${this.commandName}`;
 
   constructor(client: any, adminRoleId: string) {
     super(client);

@@ -1,8 +1,11 @@
 import { ChannelType, Message } from "discord.js";
 import BaseCommand from "./BaseCommand";
+import { prefix } from "../const";
 
 class NewCTFCommand extends BaseCommand {
   private adminRoleId: string;
+  commandName = "new ctf";
+  usageHelp = `${prefix} ${this.commandName} <CTF-NAME>`
 
   constructor(client: any, adminRoleId: string) {
     super(client);

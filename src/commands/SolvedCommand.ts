@@ -1,7 +1,11 @@
 import { Message } from 'discord.js';
 import BaseCommand from './BaseCommand';
+import { prefix } from '../const';
 
 class SolvedCommand extends BaseCommand {
+  commandName = 'solved';
+  usageHelp = `${prefix} ${this.commandName} <CHALL-NAME>`;
+
   async execute(message: Message<true>, args: string[]): Promise<void> {
     const solvedString = args.join(' ');
     const newChannelName = `${message.channel.name} ✅`;
