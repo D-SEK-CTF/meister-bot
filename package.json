@@ -1,18 +1,24 @@
 {
-  "name": "panternbot",
+  "name": "meister-bot",
   "version": "1.0.0",
-  "type": "module",
+  "type": "CommonJS",
   "description": "The bot used in our Discord during CTFs.",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start":"nodemon index.js"
+    "start": "node dist/index.js",
+    "build": "esbuild src/index.ts --bundle --outdir=dist --platform=node --target=node14 --sourcemap --format=cjs"
   },
   "author": "Karl Sellergren",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1",
     "nodemon": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "esbuild": "^0.20.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
