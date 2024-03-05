@@ -54,7 +54,8 @@ client.on('messageCreate', (message) => {
         const args = botCommand
           .slice(command.commandName.length)
           .trim()
-          .split(/ +/);
+          .split(/ +/)
+          .filter(Boolean);
         command.execute(message, args).catch((error) => {
           // NOTE: This mainly handles assertion errors with custom messages
           console.error(error);

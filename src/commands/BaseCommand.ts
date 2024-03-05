@@ -1,4 +1,3 @@
-import { assert } from 'console';
 import { Client, Message } from 'discord.js';
 
 abstract class BaseCommand {
@@ -26,17 +25,17 @@ abstract class BaseCommand {
   }
 
   assertArgsLength(args: string[], length: number): void {
-    assert(
-      args.length === length,
-      `Expected ${length} arguments, received ${args.length}`,
-    );
+    if (args.length !== length) {
+      throw new Error(`Expected ${length} arguments, received ${args.length}`);
+    }
   }
 
   assertArgsLengthRange(args: string[], min: number, max: number): void {
-    assert(
-      args.length >= min && args.length <= max,
-      `Expected between ${min} and ${max} arguments, received ${args.length}`,
-    );
+    if (args.length < min || args.length > max) {
+      throw new Error(
+        `Expected between ${min} and ${max} arguments, received ${args.length}`,
+      );
+    }
   }
 
   assertNotInGeneralChannel(message: Message<true>): void {
