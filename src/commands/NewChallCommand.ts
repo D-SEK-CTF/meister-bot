@@ -31,7 +31,7 @@ class NewChallCommand extends BaseCommand {
     }
 
     try {
-      const newChannel = await message.guild!.channels.create({
+      const newChannel = await message.guild.channels.create({
         name: channelName,
         type: ChannelType.GuildText,
         parent: category.id,

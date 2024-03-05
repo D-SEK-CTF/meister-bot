@@ -10,7 +10,7 @@ class SolvedCommand extends BaseCommand {
     const solvedString = args.join(' ');
     const newChannelName = `${message.channel.name} ✅`;
 
-    if ('setName' in message.channel) {
+    if (message.channel.isTextBased()) {
       try {
         await message.channel.setName(newChannelName);
         message.reply(`Challenge solved: \`${solvedString}\``);

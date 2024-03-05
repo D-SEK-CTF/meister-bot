@@ -25,18 +25,18 @@ class NewCTFCommand extends BaseCommand {
     }
 
     try {
-      const category = await message.guild!.channels.create({
+      const category = await message.guild.channels.create({
         name: categoryName,
         type: ChannelType.GuildCategory,
       });
 
-      const textChannel = await message.guild!.channels.create({
+      const textChannel = await message.guild.channels.create({
         name: categoryName,
         type: ChannelType.GuildText,
         parent: category.id,
       });
 
-      await message.guild!.channels.create({
+      await message.guild.channels.create({
         name: categoryName,
         type: ChannelType.GuildVoice,
         parent: category.id,
