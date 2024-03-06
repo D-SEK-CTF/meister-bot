@@ -1,8 +1,9 @@
 import { prefix } from '../const';
 import { getCategoryChannels } from '../utils/getCategoryChannels';
 import { solvedChannelName } from '../utils/solvedChannelName';
+import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
-import { CategoryChannel, ChannelType, Client, Message } from 'discord.js';
+import { CategoryChannel, ChannelType, Client } from 'discord.js';
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;
@@ -14,10 +15,9 @@ class NewChallCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  async execute(message: Message<true>, args: string[]): Promise<void> {
+  async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
     this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLength(args, 1);
-    this.assertInGuildChannel(message);
     this.assertNotInGeneralChannel(message);
 
     const [channelName] = args;
@@ -53,7 +53,7 @@ class NewChallCommand extends BaseCommand {
    * @throws Error if the channel already exists
    */
   assertChannelDoesNotExist(
-    message: Message<true>,
+    message: ValidMemberMessage,
     channelName: string,
     category: CategoryChannel,
   ): void {
@@ -64,16 +64,6 @@ class NewChallCommand extends BaseCommand {
     });
     if (channel) {
       throw new Error(`Channel ${channelName} already exists.`);
-    }
-  }
-
-  /**
-   * @param message The message object
-   * @throws Error if the command was used in the wrong channel
-   */
-  assertInGuildChannel(message: Message<true>): void {
-    if (!message.guild) {
-      throw new Error('This command must be used in a guild.');
     }
   }
 }

@@ -1,7 +1,8 @@
-import { ChannelType, Client, Message } from 'discord.js';
+import { ChannelType, Client } from 'discord.js';
 import BaseCommand from './BaseCommand';
 import { prefix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
+import { ValidMemberMessage } from '../utils/validateMessage';
 
 class NewCTFCommand extends BaseCommand {
   private adminRoleId: string;
@@ -13,7 +14,7 @@ class NewCTFCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  async execute(message: Message<true>, args: string[]): Promise<void> {
+  async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
     this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLength(args, 1);
 
@@ -46,7 +47,7 @@ class NewCTFCommand extends BaseCommand {
    * @throws Error if the category already exists
    */
   assertChannelNotAlreadyExists(
-    message: Message<true>,
+    message: ValidMemberMessage,
     categoryName: string,
   ): void {
     const channel = findChannelByName(

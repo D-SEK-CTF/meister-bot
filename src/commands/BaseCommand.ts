@@ -1,4 +1,5 @@
-import { Client, Message } from 'discord.js';
+import { Client } from 'discord.js';
+import { ValidMemberMessage } from '../utils/validateMessage';
 
 abstract class BaseCommand {
   client: Client;
@@ -12,15 +13,15 @@ abstract class BaseCommand {
     this.client = client;
   }
 
-  abstract execute(message: Message, args: string[]): Promise<void>;
+  abstract execute(message: ValidMemberMessage, args: string[]): Promise<void>;
 
-  hasRoleId(message: Message, id: string): boolean {
+  hasRoleId(message: ValidMemberMessage, id: string): boolean {
     return message.member
       ? message.member.roles.cache.some((role) => role.id === id)
       : false;
   }
 
-  sendUsageHelp(message: Message): void {
+  sendUsageHelp(message: ValidMemberMessage): void {
     message.reply(`Usage: ${this.usageHelp}`);
   }
 
@@ -38,19 +39,19 @@ abstract class BaseCommand {
     }
   }
 
-  assertNotInGeneralChannel(message: Message<true>): void {
-    if (message.channel.parent?.name === 'general') {
+  assertNotInGeneralChannel(message: ValidMemberMessage): void {
+    if (message.channel.parent.name === 'general') {
       throw new Error('Please use this command inside a challenge channel.');
     }
   }
 
-  assertInTextChannel(message: Message<true>): void {
+  assertInTextChannel(message: ValidMemberMessage): void {
     if (!message.channel.isTextBased()) {
       throw new Error('This command can only be used in a text channel.');
     }
   }
 
-  assertHasRole(message: Message<true>, roleId: string): void {
+  assertHasRole(message: ValidMemberMessage, roleId: string): void {
     if (!this.hasRoleId(message, roleId)) {
       throw new Error('You do not have permission to use this command.');
     }

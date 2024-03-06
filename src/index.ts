@@ -5,6 +5,7 @@ import NewChallCommand from './commands/NewChallCommand';
 import SolvedCommand from './commands/SolvedCommand';
 import TestRoleCommand from './commands/TestRoleCommand';
 import { adminRoleID, botToken, prefix } from './const';
+import { validateMessage } from './utils/validateMessage';
 
 const client = new Client({
   intents: [
@@ -24,10 +25,6 @@ if (!adminRoleID) {
   process.exit(1);
 }
 
-client.once('ready', () => {
-  console.log('Meister is ready!');
-});
-
 const commands = [
   new NewChallCommand(client, adminRoleID),
   new NewCTFCommand(client, adminRoleID),
@@ -37,10 +34,12 @@ const commands = [
 const commandNames = commands.map((command) => command.commandName);
 const helpCommands = commands.map((command) => command.usageHelp);
 
+client.once('ready', () => {
+  console.log('Meister is ready!');
+});
+
 client.on('messageCreate', (message) => {
-  if (message.author.bot) return;
-  if (!message.content.startsWith(prefix)) return;
-  if (!message.inGuild()) return;
+  if (!validateMessage(message)) return;
 
   const botCommand = message.content
     .slice(prefix.length)
