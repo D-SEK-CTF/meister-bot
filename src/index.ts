@@ -68,9 +68,9 @@ client.on('messageCreate', (message) => {
     // Help command
     if (botCommand === 'help') {
       message.reply(
-        `Available commands: \`${helpCommands.join(
-          '`, `',
-        )}\`.\n\nType \`${prefix} help <command>\` for more info.`,
+        `## Available commands\n\`${helpCommands.join(
+          '`, \n`',
+        )}\`. \n### Source code: [github.com/flagermeisters/meister-bot](https://github.com/flagermeisters/meister-bot)`,
       );
       return;
     }

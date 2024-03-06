@@ -1,5 +1,6 @@
 import { prefix } from '../const';
 import { getCategoryChannels } from '../utils/getCategoryChannels';
+import { solvedChannelName } from '../utils/solvedChannelName';
 import BaseCommand from './BaseCommand';
 import { CategoryChannel, ChannelType, Message } from 'discord.js';
 
@@ -56,9 +57,11 @@ class NewChallCommand extends BaseCommand {
     channelName: string,
     category: CategoryChannel,
   ): void {
-    const channel = getCategoryChannels(message, category).find(
-      (channel) => channel.name === channelName,
-    );
+    const channel = getCategoryChannels(message, category).find((channel) => {
+      return [channel.name, solvedChannelName(channel.name)].includes(
+        solvedChannelName(channelName),
+      );
+    });
     if (channel) {
       throw new Error(`Channel ${channelName} already exists.`);
     }
