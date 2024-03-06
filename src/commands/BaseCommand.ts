@@ -40,15 +40,19 @@ abstract class BaseCommand {
 
   assertNotInGeneralChannel(message: Message<true>): void {
     if (message.channel.parent?.name === 'general') {
-      message.reply('Please use this command inside a challenge channel.');
-      throw new Error('Command used in general channel');
+      throw new Error('Please use this command inside a challenge channel.');
     }
   }
 
   assertInTextChannel(message: Message<true>): void {
     if (!message.channel.isTextBased()) {
-      message.reply('This command can only be used in a text channel.');
-      throw new Error('Command used in non-text channel');
+      throw new Error('This command can only be used in a text channel.');
+    }
+  }
+
+  assertHasRole(message: Message<true>, roleId: string): void {
+    if (!this.hasRoleId(message, roleId)) {
+      throw new Error('You do not have permission to use this command.');
     }
   }
 }

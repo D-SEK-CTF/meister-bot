@@ -76,8 +76,11 @@ client.on('messageCreate', (message) => {
     }
 
     // Fuzzy matching
-    const searcher = new Searcher(Object.keys(commands));
-    const matches = searcher.search(botCommand);
+    const commandName = botCommand.split(' ')[0];
+    const searcher = new Searcher(commandNames);
+    const matches = searcher.search(commandName, {
+      threshold: 0.5,
+    });
     let response = 'Invalid command.';
     if (matches.length > 0) {
       response += ` Did you mean: \`${matches.join('`, `')}\`?`;

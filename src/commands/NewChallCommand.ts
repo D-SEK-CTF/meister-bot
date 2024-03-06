@@ -1,11 +1,12 @@
-import { prefix } from "../const";
-import BaseCommand from "./BaseCommand";
-import { ChannelType, Message } from "discord.js";
+import { prefix } from '../const';
+import { getCategoryChannels } from '../utils/getCategoryChannels';
+import BaseCommand from './BaseCommand';
+import { CategoryChannel, ChannelType, Message } from 'discord.js';
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;
-  commandName = "new chall";
-  usageHelp = `${prefix} ${this.commandName} <CHALL-NAME>`
+  commandName = 'new chall';
+  usageHelp = `${prefix} ${this.commandName} <CHALL-NAME>`;
 
   constructor(client: any, adminRoleId: string) {
     super(client);
@@ -13,34 +14,63 @@ class NewChallCommand extends BaseCommand {
   }
 
   async execute(message: Message<true>, args: string[]): Promise<void> {
-    if (!this.hasRoleId(message, this.adminRoleId)) {
-      message.reply("You do not have permission to use this command.");
-      return;
-    }
+    this.assertHasRole(message, this.adminRoleId);
+    this.assertArgsLength(args, 1);
+    this.assertInGuildChannel(message);
+    this.assertNotInGeneralChannel(message);
 
-    const channelName = args.join(" ");
-    if (channelName === "") {
-      message.reply("Please specify a name for the challenge.");
-      return;
-    }
+    const [channelName] = args;
 
-    const category = message.channel.parent;
+    const category = message.channel.parent as CategoryChannel;
+    this.assertValidCategory(category);
+    this.assertChannelDoesNotExist(message, channelName, category);
+
+    const newChannel = await message.guild.channels.create({
+      name: channelName,
+      type: ChannelType.GuildText,
+      parent: category.id,
+    });
+
+    message.channel.send(
+      `New challenge <#${newChannel.id}> created under ${category.name}.`,
+    );
+  }
+
+  /**
+   * @param category The category channel
+   * @throws Error if the category is invalid
+   */
+  assertValidCategory(category: CategoryChannel): void {
     if (!category || category.type !== ChannelType.GuildCategory) {
-      message.reply("Please use this command inside a category.");
-      return;
+      throw new Error('Please use this command inside a category.');
     }
+  }
 
-    try {
-      const newChannel = await message.guild.channels.create({
-        name: channelName,
-        type: ChannelType.GuildText,
-        parent: category.id,
-      });
+  /**
+   * @param message The message object
+   * @param category The category channel
+   * @throws Error if the channel already exists
+   */
+  assertChannelDoesNotExist(
+    message: Message<true>,
+    channelName: string,
+    category: CategoryChannel,
+  ): void {
+    const channel = getCategoryChannels(message, category).find(
+      (channel) => channel.name === channelName,
+    );
+    if (channel) {
+      throw new Error(`Channel ${channelName} already exists.`);
+    }
+  }
 
-      message.channel.send(`New challenge <#${newChannel.id}> created inside ${category.name}.`);
-    } catch (error) {
-      console.error("Failed to create challenge channel:", error);
-      message.reply("There was an error trying to create the challenge channel.");
+  /**
+   * @param message The message object
+   * @throws Error if the command was used in the wrong channel
+   */
+  assertInGuildChannel(message: Message<true>): void {
+    if (!message.guild) {
+      throw new Error('This command must be used in a guild.');
     }
   }
 }

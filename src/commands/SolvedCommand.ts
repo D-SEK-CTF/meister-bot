@@ -4,29 +4,39 @@ import { prefix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
 class SolvedCommand extends BaseCommand {
   commandName = 'solved';
-  usageHelp = `${prefix} ${this.commandName} <FLAG> [<CHALL-NAME>]`;
+  usageHelp = `${prefix} ${this.commandName} <FLAG>`;
   private solvedSuffix = '-✅';
 
   async execute(message: Message<true>, args: string[]): Promise<void> {
     // Extract the challenge name from the arguments
-    this.assertArgsLengthRange(args, 1, 2);
-    const [flag, challName] = args;
-    const channelName = challName ?? message.channel.parent?.name!;
+    this.assertArgsLength(args, 1);
+    const [flag] = args;
+    const channelName = message.channel.name;
 
     // Check if the command was used in the correct channel
     this.assertChallengeNotSolved(channelName);
-    this.assertTargetCategoryExists(message, channelName);
+    this.assertTargetChannelExists(message, channelName);
+    this.assertNotInDicussionChannel(message);
 
     // Find the category and check if it's in the general category
-    const channel = challName
-      ? findChannelByName(message, channelName, ChannelType.GuildCategory)!
-      : message.channel.parent!;
-    this.assertTargetChannelIsNotGeneral(channel);
+    const channel = message.channel;
+    this.assertTargetChannelIsNotInGeneral(channel);
 
     // Rename the channel and reply to the user
     const newChannelName = this.solvedChannelName(channelName);
     await channel.setName(newChannelName);
-    message.reply(`Solved challenge ${channelName} with flag \`${flag}\`!`);
+    message.reply(`Solved challenge with flag \`${flag}\`!`);
+  }
+
+  /**
+   *
+   * @param message The message object
+   * @throws Error if the channel is a discussion channel
+   */
+  assertNotInDicussionChannel(message: Message<true>): void {
+    if (message.channel.name === message.channel.parent?.name) {
+      throw new Error('Discussion channel cannot be solved.');
+    }
   }
 
   /**
@@ -36,7 +46,7 @@ class SolvedCommand extends BaseCommand {
    */
   assertChallengeNotSolved(challName: string): void {
     if (challName.endsWith(this.solvedSuffix)) {
-      throw new Error('Challenge is already solved');
+      throw new Error('Challenge is already solved.');
     }
   }
 
@@ -46,14 +56,14 @@ class SolvedCommand extends BaseCommand {
    * @param challName The name of the challenge
    * @throws Error if the category does not exist
    */
-  assertTargetCategoryExists(message: Message<true>, challName: string): void {
+  assertTargetChannelExists(message: Message<true>, challName: string): void {
     const channel = findChannelByName(
       message,
       challName,
-      ChannelType.GuildCategory,
+      ChannelType.GuildText,
     );
     if (!channel) {
-      throw new Error(`Channel ${challName} does not exist`);
+      throw new Error(`Channel ${challName} does not exist.`);
     }
   }
 
@@ -62,9 +72,9 @@ class SolvedCommand extends BaseCommand {
    * @param channel The channel to check
    * @throws Error if the channel is a general category
    */
-  assertTargetChannelIsNotGeneral(channel: GuildBasedChannel): void {
-    if (channel.name === 'general') {
-      throw new Error(`General category cannot be solved`);
+  assertTargetChannelIsNotInGeneral(channel: GuildBasedChannel): void {
+    if (channel.parent?.name === 'general') {
+      throw new Error(`General category cannot be solved.`);
     }
   }
 

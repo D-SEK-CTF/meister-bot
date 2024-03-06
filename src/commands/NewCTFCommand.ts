@@ -1,11 +1,12 @@
-import { ChannelType, Message } from "discord.js";
-import BaseCommand from "./BaseCommand";
-import { prefix } from "../const";
+import { ChannelType, Message } from 'discord.js';
+import BaseCommand from './BaseCommand';
+import { prefix } from '../const';
+import { findChannelByName } from '../utils/findChannelByName';
 
 class NewCTFCommand extends BaseCommand {
   private adminRoleId: string;
-  commandName = "new ctf";
-  usageHelp = `${prefix} ${this.commandName} <CTF-NAME>`
+  commandName = 'new ctf';
+  usageHelp = `${prefix} ${this.commandName} <CTF-NAME>`;
 
   constructor(client: any, adminRoleId: string) {
     super(client);
@@ -13,39 +14,48 @@ class NewCTFCommand extends BaseCommand {
   }
 
   async execute(message: Message<true>, args: string[]): Promise<void> {
-    if (!this.hasRoleId(message, this.adminRoleId)) {
-      message.reply("You do not have permission to use this command.");
-      return;
-    }
+    this.assertHasRole(message, this.adminRoleId);
+    this.assertArgsLength(args, 1);
 
-    const categoryName = args.join(" ");
-    if (categoryName === "") {
-      message.reply("Please specify a name for the CTF.");
-      return;
-    }
+    const [categoryName] = args;
 
-    try {
-      const category = await message.guild.channels.create({
-        name: categoryName,
-        type: ChannelType.GuildCategory,
-      });
+    this.assertChannelNotAlreadyExists(message, categoryName);
 
-      const textChannel = await message.guild.channels.create({
-        name: categoryName,
-        type: ChannelType.GuildText,
-        parent: category.id,
-      });
+    const category = await message.guild.channels.create({
+      name: categoryName,
+      type: ChannelType.GuildCategory,
+    });
+    const textChannel = await message.guild.channels.create({
+      name: categoryName,
+      type: ChannelType.GuildText,
+      parent: category.id,
+    });
+    await message.guild.channels.create({
+      name: categoryName,
+      type: ChannelType.GuildVoice,
+      parent: category.id,
+    });
 
-      await message.guild.channels.create({
-        name: categoryName,
-        type: ChannelType.GuildVoice,
-        parent: category.id,
-      });
+    message.reply(`New CTF <#${textChannel.id}> created.`);
+  }
 
-      message.reply(`New CTF <#${textChannel.id}> created.`);
-    } catch (error) {
-      console.error("Failed to create CTF channels:", error);
-      message.reply("There was an error trying to create CTF channels.");
+  /**
+   *
+   * @param message The message object
+   * @param categoryName The name of the category
+   * @throws Error if the category already exists
+   */
+  assertChannelNotAlreadyExists(
+    message: Message<true>,
+    categoryName: string,
+  ): void {
+    const channel = findChannelByName(
+      message,
+      categoryName,
+      ChannelType.GuildCategory,
+    );
+    if (channel) {
+      throw new Error(`CTF ${channel.name} already exists.`);
     }
   }
 }
