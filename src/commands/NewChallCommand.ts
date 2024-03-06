@@ -1,9 +1,9 @@
+import { CategoryChannel, ChannelType, Client } from 'discord.js';
 import { prefix } from '../const';
 import { getCategoryChannels } from '../utils/getCategoryChannels';
 import { solvedChannelName } from '../utils/solvedChannelName';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
-import { CategoryChannel, ChannelType, Client } from 'discord.js';
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;

@@ -1,7 +1,7 @@
 import { Client } from 'discord.js';
-import BaseCommand from './BaseCommand';
 import { prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
+import BaseCommand from './BaseCommand';
 
 class TestRoleCommand extends BaseCommand {
   private adminRoleId: string;
@@ -13,14 +13,13 @@ class TestRoleCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  execute(message: ValidMemberMessage): Promise<void> {
+  async execute(message: ValidMemberMessage): Promise<void> {
     const userName = message.member.user.username;
     if (this.hasRoleId(message, this.adminRoleId)) {
       message.reply(`User ${userName} is allowed`);
     } else {
       message.reply(`User ${userName} is NOT allowed`);
     }
-    return Promise.resolve();
   }
 }
 

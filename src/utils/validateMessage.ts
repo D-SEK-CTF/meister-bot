@@ -1,11 +1,11 @@
-import { Message, GuildTextBasedChannel } from 'discord.js';
+import { CategoryChannel, GuildTextBasedChannel, Message } from 'discord.js';
 import { prefix } from '../const';
 
 export interface ValidMemberMessage extends Message<true> {
   author: NonNullable<Message['author']>;
   member: NonNullable<Message['member']>;
   channel: GuildTextBasedChannel & {
-    parent: NonNullable<GuildTextBasedChannel['parent']>;
+    parent: CategoryChannel;
   };
 }
 

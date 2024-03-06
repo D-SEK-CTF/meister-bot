@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { Searcher } from 'fast-fuzzy';
+import ArchiveCommand from './commands/ArchiveCommand';
 import NewCTFCommand from './commands/NewCTFCommand';
 import NewChallCommand from './commands/NewChallCommand';
 import SolvedCommand from './commands/SolvedCommand';
@@ -30,6 +31,7 @@ const commands = [
   new NewCTFCommand(client, adminRoleID),
   new SolvedCommand(client),
   new TestRoleCommand(client, adminRoleID),
+  new ArchiveCommand(client, adminRoleID),
 ];
 const commandNames = commands.map((command) => command.commandName);
 const helpCommands = commands.map((command) => command.usageHelp);

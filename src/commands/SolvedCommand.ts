@@ -1,9 +1,9 @@
 import { ChannelType } from 'discord.js';
-import BaseCommand from './BaseCommand';
 import { prefix, solvedSuffix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
 import { solvedChannelName } from '../utils/solvedChannelName';
 import { ValidMemberMessage } from '../utils/validateMessage';
+import BaseCommand from './BaseCommand';
 
 class SolvedCommand extends BaseCommand {
   commandName = 'solved';

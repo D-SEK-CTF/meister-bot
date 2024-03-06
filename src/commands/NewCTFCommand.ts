@@ -1,8 +1,8 @@
 import { ChannelType, Client } from 'discord.js';
-import BaseCommand from './BaseCommand';
 import { prefix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
 import { ValidMemberMessage } from '../utils/validateMessage';
+import BaseCommand from './BaseCommand';
 
 class NewCTFCommand extends BaseCommand {
   private adminRoleId: string;
