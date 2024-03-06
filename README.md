@@ -71,3 +71,8 @@ Test access privileges:
 ```
 meister testrole
 ```
+
+Archive old ctf:
+```
+meister archive ctf
+```
