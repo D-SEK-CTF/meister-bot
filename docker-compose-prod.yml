@@ -3,8 +3,8 @@ services:
   meister-bot:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    image: meister-bot-dev:latest
+      dockerfile: Dockerfile.prod
+    image: meister-bot-prod:latest
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
