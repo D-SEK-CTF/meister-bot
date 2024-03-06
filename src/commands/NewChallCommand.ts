@@ -31,7 +31,7 @@ class NewChallCommand extends BaseCommand {
       parent: category.id,
     });
 
-    message.channel.send(
+    message.reply(
       `New challenge <#${newChannel.id}> created under ${category.name}.`,
     );
   }
