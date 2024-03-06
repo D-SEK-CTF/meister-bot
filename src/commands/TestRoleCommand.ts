@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Client, Message } from 'discord.js';
 import BaseCommand from './BaseCommand';
 import { prefix } from '../const';
 
@@ -7,7 +7,7 @@ class TestRoleCommand extends BaseCommand {
   commandName = 'testrole';
   usageHelp = `${prefix} ${this.commandName}`;
 
-  constructor(client: any, adminRoleId: string) {
+  constructor(client: Client, adminRoleId: string) {
     super(client);
     this.adminRoleId = adminRoleId;
   }

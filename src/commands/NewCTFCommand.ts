@@ -1,4 +1,4 @@
-import { ChannelType, Message } from 'discord.js';
+import { ChannelType, Client, Message } from 'discord.js';
 import BaseCommand from './BaseCommand';
 import { prefix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
@@ -8,7 +8,7 @@ class NewCTFCommand extends BaseCommand {
   commandName = 'new ctf';
   usageHelp = `${prefix} ${this.commandName} <CTF-NAME>`;
 
-  constructor(client: any, adminRoleId: string) {
+  constructor(client: Client, adminRoleId: string) {
     super(client);
     this.adminRoleId = adminRoleId;
   }

@@ -2,14 +2,14 @@ import { prefix } from '../const';
 import { getCategoryChannels } from '../utils/getCategoryChannels';
 import { solvedChannelName } from '../utils/solvedChannelName';
 import BaseCommand from './BaseCommand';
-import { CategoryChannel, ChannelType, Message } from 'discord.js';
+import { CategoryChannel, ChannelType, Client, Message } from 'discord.js';
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;
   commandName = 'new chall';
   usageHelp = `${prefix} ${this.commandName} <CHALL-NAME>`;
 
-  constructor(client: any, adminRoleId: string) {
+  constructor(client: Client, adminRoleId: string) {
     super(client);
     this.adminRoleId = adminRoleId;
   }

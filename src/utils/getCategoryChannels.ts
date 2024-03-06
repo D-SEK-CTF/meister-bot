@@ -1,11 +1,4 @@
-import {
-  CategoryChannel,
-  ForumChannel,
-  MediaChannel,
-  Message,
-  NewsChannel,
-  TextChannel,
-} from 'discord.js';
+import { CategoryChannel, Message } from 'discord.js';
 
 function getCategoryChannels(
   message: Message<true>,

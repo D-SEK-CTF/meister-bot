@@ -25,6 +25,11 @@ Install node dependencies:
 $> npm install --also=dev
 ```
 
+Install pre-commit hooks:
+```
+$> npx husky install
+```
+
 Start the dev container:
 ```bash
 $> docker compose up
@@ -42,27 +47,27 @@ $> docker compose -f docker-compose-prod.yml up
 The meister bot can be interacted with through discord.
 The following commands are available (and possibly more depending on how often this README is updated).
 
-List available commands
+List available commands:
 ```
 meister help
 ```
 
-Create new CTF category
+Create new CTF category:
 ```
 meister new ctf <CTF-NAME>
 ```
 
-Create new challenge under existing CTF
+Create new challenge under existing CTF:
 ```
 meister new chall <CHALL-NAME>
 ```
 
-Solve challenge under existing CTF
+Solve challenge under existing CTF:
 ```
 meister solved <FLAG>
 ```
 
-Test access privileges
+Test access privileges:
 ```
 meister testrole
 ```
