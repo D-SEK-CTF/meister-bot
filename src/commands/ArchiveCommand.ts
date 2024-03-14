@@ -13,17 +13,6 @@ class ArchiveCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  /**
-   *
-   * @param message ValidMemberMessage
-   * @throws Error if the CTF is already archived
-   */
-  assertNotAlreadyArchived(message: ValidMemberMessage) {
-    if (message.channel.parent.name.endsWith('(archived)')) {
-      throw new Error('CTF is already archived.');
-    }
-  }
-
   async execute(message: ValidMemberMessage): Promise<void> {
     this.assertHasRole(message, this.adminRoleId);
     this.assertNotInGeneralChannel(message);
@@ -42,6 +31,17 @@ class ArchiveCommand extends BaseCommand {
     });
 
     message.reply('CTF has been archived.');
+  }
+
+  /**
+   *
+   * @param message ValidMemberMessage
+   * @throws Error if the CTF is already archived
+   */
+  assertNotAlreadyArchived(message: ValidMemberMessage) {
+    if (message.channel.parent.name.endsWith('(archived)')) {
+      throw new Error('CTF is already archived.');
+    }
   }
 }
 

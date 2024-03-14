@@ -20,6 +20,7 @@ class NewCTFCommand extends BaseCommand {
 
     const [categoryName] = args;
 
+    this.assertChannelNameIsValid(categoryName);
     this.assertChannelNotAlreadyExists(message, categoryName);
 
     const category = await message.guild.channels.create({
@@ -57,6 +58,17 @@ class NewCTFCommand extends BaseCommand {
     );
     if (channel) {
       throw new Error(`CTF ${channel.name} already exists.`);
+    }
+  }
+
+  /**
+   *
+   * @param categoryName The name of the category
+   * @throws Error if the category name is invalid
+   */
+  assertChannelNameIsValid(categoryName: string): void {
+    if (categoryName === '') {
+      throw new Error('Invalid category name.');
     }
   }
 }

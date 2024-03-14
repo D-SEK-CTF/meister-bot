@@ -51,16 +51,8 @@ client.on('messageCreate', (message) => {
   // Exact matching with early return
   for (const command of Object.values(commands)) {
     if (botCommand.startsWith(command.commandName)) {
-      const args = botCommand
-        .slice(command.commandName.length)
-        .trim()
-        .split(/ +/)
-        .filter(Boolean);
-      command.execute(message, args).catch((error) => {
-        // NOTE: This mainly handles assertion errors with custom messages
-        console.error(error);
-        message.reply(error.message);
-      });
+      const argString = botCommand.slice(command.commandName.length).trim();
+      command.handleCommand(message, argString);
       return;
     }
   }
