@@ -7,7 +7,7 @@ import BaseCommand from './BaseCommand';
 class NewCTFCommand extends BaseCommand {
   private adminRoleId: string;
   commandName = 'new ctf';
-  usageHelp = `${prefix} ${this.commandName} <CTF-NAME>`;
+  usageHelp = `${prefix} ${this.commandName} <CTF-NAME> [CTF-URL] [USERNAME] [PASSWORD]`;
 
   constructor(client: Client, adminRoleId: string) {
     super(client);
@@ -16,10 +16,11 @@ class NewCTFCommand extends BaseCommand {
 
   async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
     this.assertHasRole(message, this.adminRoleId);
-    this.assertArgsLength(args, 1);
+    this.assertArgsLengthRange(args, 1, 4);
 
-    const [categoryName] = args;
+    const [categoryName, ctfUrl, ctfUsername, ctfPassword] = args;
 
+    if (ctfUrl) this.assertValidUrl(ctfUrl);
     this.assertChannelNameIsValid(categoryName);
     this.assertChannelNotAlreadyExists(message, categoryName);
 
@@ -32,16 +33,31 @@ class NewCTFCommand extends BaseCommand {
       type: ChannelType.GuildText,
       parent: category.id,
     });
-    await message.guild.channels.create({
-      name: discussionChannelName,
-      type: ChannelType.GuildVoice,
-      parent: category.id,
-    });
 
     // Move the category to the top
     await category.setPosition(1);
 
+    // Write the URL, username, and password to the channel topic
+    const topic = this.createTopicString({
+      URL: ctfUrl,
+      Username: ctfUsername,
+      Password: ctfPassword,
+    });
+    await textChannel.setTopic(topic);
+
     message.reply(`New CTF <#${textChannel.id}> created.`);
+  }
+
+  createTopicString(topic: Record<string, string>): string {
+    // Remove any empty values
+    Object.entries(topic).forEach(([key, value]) => {
+      if (!value) delete topic[key];
+    });
+
+    // Convert the object to a string
+    return Object.entries(topic)
+      .map(([key, value]) => `**${key}**: ${value}`)
+      .join('\n');
   }
 
   /**
@@ -72,6 +88,21 @@ class NewCTFCommand extends BaseCommand {
   assertChannelNameIsValid(categoryName: string): void {
     if (categoryName === '') {
       throw new Error('Invalid category name.');
+    }
+  }
+
+  /**
+   *
+   * @param url The URL to validate
+   * @throws Error if the URL is invalid
+   * @example
+   * ```ts
+   * this.assertValidUrl(url);
+   * ```
+   */
+  assertValidUrl(url: string): void {
+    if (!url.startsWith('http')) {
+      throw new Error('Invalid URL.');
     }
   }
 }
