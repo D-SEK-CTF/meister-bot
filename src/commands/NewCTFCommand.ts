@@ -38,6 +38,9 @@ class NewCTFCommand extends BaseCommand {
       parent: category.id,
     });
 
+    // Move the category to the top
+    await category.setPosition(1);
+
     message.reply(`New CTF <#${textChannel.id}> created.`);
   }
 
