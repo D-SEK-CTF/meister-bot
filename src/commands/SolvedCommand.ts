@@ -1,5 +1,5 @@
 import { ChannelType } from 'discord.js';
-import { prefix, solvedSuffix } from '../const';
+import { discussionChannelName, prefix, solvedSuffix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
 import { solvedChannelName } from '../utils/solvedChannelName';
 import { ValidMemberMessage } from '../utils/validateMessage';
@@ -35,7 +35,7 @@ class SolvedCommand extends BaseCommand {
    * @throws Error if the channel is a discussion channel
    */
   assertNotInDiscussionChannel(message: ValidMemberMessage): void {
-    if (message.channel.name === message.channel.parent.name) {
+    if (message.channel.name === discussionChannelName) {
       throw new Error('Discussion channel cannot be solved.');
     }
   }

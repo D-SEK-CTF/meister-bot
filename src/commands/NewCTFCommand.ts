@@ -1,5 +1,5 @@
 import { ChannelType, Client } from 'discord.js';
-import { prefix } from '../const';
+import { discussionChannelName, prefix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
@@ -28,12 +28,12 @@ class NewCTFCommand extends BaseCommand {
       type: ChannelType.GuildCategory,
     });
     const textChannel = await message.guild.channels.create({
-      name: categoryName,
+      name: discussionChannelName,
       type: ChannelType.GuildText,
       parent: category.id,
     });
     await message.guild.channels.create({
-      name: categoryName,
+      name: discussionChannelName,
       type: ChannelType.GuildVoice,
       parent: category.id,
     });
