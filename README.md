@@ -54,7 +54,7 @@ meister help
 
 Create new CTF category:
 ```
-meister new ctf <CTF-NAME>
+meister new ctf <CTF-NAME> [CTF-URL] [USERNAME] [PASSWORD]
 ```
 
 Create new challenge under existing CTF:
