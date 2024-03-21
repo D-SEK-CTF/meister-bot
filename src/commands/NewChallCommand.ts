@@ -16,7 +16,6 @@ class NewChallCommand extends BaseCommand {
   }
 
   async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
-    this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLength(args, 1);
     this.assertNotInGeneralChannel(message);
 
