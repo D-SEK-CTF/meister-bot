@@ -25,15 +25,19 @@ abstract class BaseCommand {
     message: ValidMemberMessage,
     argString: string,
   ): Promise<void> {
-    // Parse the arguments (split by spaces and respecting quotes)
-    const args = this.parseArgs(argString);
-
-    // Execute the command in each subclass
-    this.execute(message, args).catch((error) => {
-      // NOTE: This mainly handles assertion errors with custom messages
-      console.error(error);
-      message.reply(error.message);
-    });
+    // Ignore the function wrapper, it's just for better error handling
+    (async () => {
+      // Parse the arguments (split by spaces and respecting quotes)
+      const args = this.parseArgs(argString);
+      // Execute the command in each subclass
+      await this.execute(message, args);
+    })
+      .call(this)
+      .catch((error) => {
+        // NOTE: This mainly handles assertion errors with custom messages
+        console.error(error);
+        message.reply(error.message);
+      });
   }
 
   /**
