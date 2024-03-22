@@ -4,11 +4,12 @@ import { getCategoryChannels } from '../utils/getCategoryChannels';
 import { solvedChannelName } from '../utils/solvedChannelName';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
+import { findChannelByName } from '../utils/findChannelByName';
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;
   commandName = 'new chall';
-  usageHelp = `${prefix} ${this.commandName} <CHALL-NAME>`;
+  usageHelp = `${prefix} ${this.commandName} <CHALL-NAME> [CTF-NAME]`;
 
   constructor(client: Client, adminRoleId: string) {
     super(client);
@@ -16,12 +17,14 @@ class NewChallCommand extends BaseCommand {
   }
 
   async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
-    this.assertArgsLength(args, 1);
+    this.assertArgsLengthRange(args, 1, 2);
     this.assertNotInGeneralChannel(message);
 
-    const [channelName] = args;
+    const [channelName, ctfName] = args;
 
-    const category = message.channel.parent as CategoryChannel;
+    const category = ctfName
+      ? findChannelByName(message, ctfName, ChannelType.GuildCategory, true)
+      : message.channel.parent;
     this.assertValidCategory(category);
     this.assertChannelDoesNotExist(message, channelName, category);
 
@@ -32,7 +35,7 @@ class NewChallCommand extends BaseCommand {
     });
 
     message.reply(
-      `New challenge <#${newChannel.id}> created under ${category.name}.`,
+      `New challenge <#${newChannel.id}> created under \`${category.name}\`.`,
     );
   }
 

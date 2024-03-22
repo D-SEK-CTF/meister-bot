@@ -1,5 +1,5 @@
 import { ChannelType, Client } from 'discord.js';
-import { discussionChannelName, prefix } from '../const';
+import { archivedSuffix, discussionChannelName, prefix } from '../const';
 import { findChannelByName } from '../utils/findChannelByName';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
@@ -45,7 +45,7 @@ class NewCTFCommand extends BaseCommand {
     });
     await textChannel.setTopic(topic);
 
-    message.reply(`New CTF <#${textChannel.id}> created.`);
+    message.reply(`New CTF \`${category.name}\` created: <#${textChannel.id}>`);
   }
 
   createTopicString(topic: Record<string, string>): string {
@@ -70,11 +70,13 @@ class NewCTFCommand extends BaseCommand {
     message: ValidMemberMessage,
     categoryName: string,
   ): void {
-    const channel = findChannelByName(
-      message,
-      categoryName,
-      ChannelType.GuildCategory,
-    );
+    const channel =
+      findChannelByName(message, categoryName, ChannelType.GuildCategory) ||
+      findChannelByName(
+        message,
+        `${categoryName}${archivedSuffix}`,
+        ChannelType.GuildCategory,
+      );
     if (channel) {
       throw new Error(`CTF ${channel.name} already exists.`);
     }

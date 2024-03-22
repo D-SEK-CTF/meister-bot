@@ -15,10 +15,15 @@ class TestRoleCommand extends BaseCommand {
 
   async execute(message: ValidMemberMessage): Promise<void> {
     const userName = message.member.user.username;
+    const role = message.guild.roles.cache.get(this.adminRoleId);
+    const roleName = role ? role.name : 'Unknown Role';
+
     if (this.hasRoleId(message, this.adminRoleId)) {
-      message.reply(`User ${userName} is allowed`);
+      message.reply(`User \`${userName}\` is member of group \`${roleName}\`.`);
     } else {
-      message.reply(`User ${userName} is NOT allowed`);
+      message.reply(
+        `User \`${userName}\` is NOT member of group \`${roleName}\`.`,
+      );
     }
   }
 }

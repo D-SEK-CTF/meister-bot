@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { CategoryChannel, Client } from 'discord.js';
 import { ValidMemberMessage } from '../utils/validateMessage';
 
 abstract class BaseCommand {
@@ -170,6 +170,12 @@ abstract class BaseCommand {
   assertNotInGeneralChannel(message: ValidMemberMessage): void {
     if (message.channel.parent.name === 'general') {
       throw new Error('Please use this command inside a challenge channel.');
+    }
+  }
+
+  assertNotGeneralCategory(category: CategoryChannel): void {
+    if (category.name === 'general') {
+      throw new Error('Please use this command inside a challenge category.');
     }
   }
 
