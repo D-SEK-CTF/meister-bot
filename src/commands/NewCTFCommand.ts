@@ -78,7 +78,11 @@ class NewCTFCommand extends BaseCommand {
         ChannelType.GuildCategory,
       );
     if (channel) {
-      throw new Error(`CTF ${channel.name} already exists.`);
+      throw new Error(
+        `CTF \`${channel.name}\` already exists: ${channel.children.cache.at(
+          0,
+        )}`,
+      );
     }
   }
 

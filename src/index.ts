@@ -43,14 +43,12 @@ client.once('ready', () => {
 client.on('messageCreate', (message) => {
   if (!validateMessage(message)) return;
 
-  const botCommand = message.content
-    .slice(prefix.length)
-    .trim()
-    .toLocaleLowerCase();
+  const botCommand = message.content.slice(prefix.length).trim();
+  const botCommandLower = botCommand.toLowerCase();
 
   // Exact matching with early return
   for (const command of Object.values(commands)) {
-    if (botCommand.startsWith(command.commandName)) {
+    if (botCommandLower.startsWith(command.commandName)) {
       const argString = botCommand.slice(command.commandName.length).trim();
       command.handleCommand(message, argString);
       return;

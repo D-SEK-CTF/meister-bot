@@ -30,7 +30,8 @@ function findChannelByName<T extends ChannelType>(
 ): MappedChannelTypes[T] {
   const channel = message.guild.channels.cache.find(
     (channel) =>
-      channel.name === channelName && (!type || channel.type === type),
+      channel.name.toLowerCase() === channelName.toLowerCase() &&
+      (!type || channel.type === type),
   );
 
   if (assertNotExists && !channel) {

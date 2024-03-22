@@ -56,16 +56,23 @@ class NewChallCommand extends BaseCommand {
    */
   assertChannelDoesNotExist(
     message: ValidMemberMessage,
-    channelName: string,
+    targetChannelName: string,
     category: CategoryChannel,
   ): void {
-    const channel = getCategoryChannels(message, category).find((channel) => {
-      return [channel.name, solvedChannelName(channel.name)].includes(
-        solvedChannelName(channelName),
+    const categoryChannels = getCategoryChannels(message, category);
+    const targetChannelNameLower = targetChannelName.toLowerCase();
+
+    const channel = categoryChannels.find((channel) => {
+      const channelNameLower = channel.name.toLowerCase();
+
+      return (
+        channelNameLower === targetChannelNameLower ||
+        channelNameLower === solvedChannelName(targetChannelNameLower)
       );
     });
+
     if (channel) {
-      throw new Error(`Channel ${channelName} already exists.`);
+      throw new Error(`Challenge <#${channel.id}> already exists.`);
     }
   }
 }
