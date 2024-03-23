@@ -47,32 +47,64 @@ $> docker compose -f docker-compose-prod.yml up
 The meister bot can be interacted with through discord.
 The following commands are available (and possibly more depending on how often this README is updated).
 
-List available commands:
+Arguments surrounded by `<>` are required, arguments surrounded by `[]` are optional. All commands support the use of whitespaces, by surrounding the argument with matching citation marks (`"` or `'`).
+
+### Help
+
+Lists all available commands together with their arguments.
+
 ```
 meister help
 ```
 
-Create new CTF category:
+### New CTF
+Creates a new CTF, and a channel called "discussion" under it.
+
+If provided, the url, username, and password will be included in the channel topic in the discussion chanel.
 ```
 meister new ctf <CTF-NAME> [CTF-URL] [USERNAME] [PASSWORD]
 ```
 
-Create new challenge under existing CTF:
+NOTE: Directly after creation, the category is moved up to the second position in the category list. This is fitting for the flägermeister discord, but will likely have to be changed for other servers.
+
+### New challenge
+Creates a new challenge under a specified CTF. If no CTF name is provided, it will implicitly choose the mother category that the command was typed in.
+
+The CTF name is matched via a non-case-sensitive search.
 ```
-meister new chall <CHALL-NAME>
+meister new chall <CHALL-NAME> [CTF-NAME]
 ```
 
-Solve challenge under existing CTF:
+### Solve challenge
+Marks a challenge as solved, and accepts an argument for the flag used to solve the challenge.
+
+Solved challenges are named `{challnName}-✅`
 ```
 meister solved <FLAG>
 ```
 
-Test access privileges:
+### Test access privileges
+Tests if the user is a member of the admin group. This is more of a testing command included for legacy reasons.
+
+Below are the privileges required for each command:
+| Attribute   | Value  |
+|-------------|--------|
+| archive     | admin  |
+| new chall   | none   |
+| new ctf     | admin  |
+| solved      | none   |
+| test role   | none   |
+| help        | none   |
+
 ```
 meister testrole
 ```
 
-Archive old ctf:
+### Archive CTF
+Archives a CTF. This means a couple things:
+- All CTF channels become read-only
+- The category is renamed to `{categoryName} (archived)`
+- The category is moved down to the other archived CTFs (or the bottom if none exist)
 ```
-meister archive ctf
+meister archive ctf [CTF-NAME]
 ```
