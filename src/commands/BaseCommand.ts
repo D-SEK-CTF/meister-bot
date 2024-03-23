@@ -41,6 +41,7 @@ abstract class BaseCommand {
   }
 
   /**
+   * Parse arguments from a string
    *
    * @param content The arguments to parse
    * @returns An array of arguments
@@ -55,7 +56,11 @@ abstract class BaseCommand {
     const validQuotes = ["'", '"'];
     let lastQuote = '';
     let currentArg = '';
-    const args = [];
+    const args: string[] = [];
+
+    if (content === '') {
+      return args;
+    }
 
     // Iterate through each character in the content
     content.split('').forEach((char, index, chars) => {
@@ -137,7 +142,11 @@ abstract class BaseCommand {
    */
   assertArgsLength(args: string[], length: number): void {
     if (args.length !== length) {
-      throw new Error(`Expected ${length} arguments, received ${args.length}.`);
+      throw new Error(
+        `Expected ${length} ${
+          length === 1 ? 'argument' : 'arguments'
+        }, received ${args.length}.\n\nUsage: \`${this.usageHelp}\``,
+      );
     }
   }
 
@@ -156,7 +165,9 @@ abstract class BaseCommand {
   assertArgsLengthRange(args: string[], min: number, max: number): void {
     if (args.length < min || args.length > max) {
       throw new Error(
-        `Expected between ${min} and ${max} arguments, received ${args.length}.`,
+        `Expected between ${min} and ${max} ${
+          max === 1 ? 'argument' : 'arguments'
+        }, received ${args.length}.\n\nUsage: \`${this.usageHelp}\``,
       );
     }
   }
@@ -175,7 +186,7 @@ abstract class BaseCommand {
 
   assertNotGeneralCategory(category: CategoryChannel): void {
     if (category.name === 'general') {
-      throw new Error('Please use this command inside a challenge category.');
+      throw new Error('Please use this command inside a CTF category.');
     }
   }
 
