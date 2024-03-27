@@ -8,6 +8,8 @@ import {
   TextChannel,
   VoiceChannel,
 } from 'discord.js';
+import { CtfChannel } from '../CtfChannel';
+import { ValidMemberMessage } from './validateMessage';
 
 type MappedChannelTypes = {
   [ChannelType.GuildText]: TextChannel;
@@ -22,23 +24,26 @@ type MappedChannelTypes = {
   [ChannelType.GuildDirectory]: TextChannel;
 } & MappedGuildChannelTypes;
 
-function findChannelByName<T extends ChannelType>(
-  message: Message<true>,
+function findCtfChannelByName<T extends ChannelType>(
+  category: CategoryChannel,
   channelName: string,
   type?: T,
   assertNotExists = false,
 ): MappedChannelTypes[T] {
-  const channel = message.guild.channels.cache.find(
+  const channels = category.children.cache.map(
+    (channel) => new CtfChannel(channel as ValidMemberMessage['channel']),
+  );
+  const channel = channels.find(
     (channel) =>
       channel.name.toLowerCase() === channelName.toLowerCase() &&
-      (!type || channel.type === type),
+      (!type || channel.channelObject.type === type),
   );
 
   if (assertNotExists && !channel) {
     throw new Error(`Channel ${channelName} not found.`);
   }
 
-  return channel as MappedChannelTypes[T];
+  return channel?.channelObject as MappedChannelTypes[T];
 }
 
-export { findChannelByName };
+export { findCtfChannelByName };

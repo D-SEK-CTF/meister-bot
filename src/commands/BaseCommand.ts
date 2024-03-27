@@ -1,5 +1,6 @@
 import { CategoryChannel, Client } from 'discord.js';
 import { ValidMemberMessage } from '../utils/validateMessage';
+import { CtfChannel } from '../CtfChannel';
 
 abstract class BaseCommand {
   client: Client;
@@ -13,7 +14,11 @@ abstract class BaseCommand {
     this.client = client;
   }
 
-  abstract execute(message: ValidMemberMessage, args: string[]): Promise<void>;
+  abstract execute(
+    message: ValidMemberMessage,
+    channel: CtfChannel,
+    args: string[],
+  ): Promise<void>;
 
   /**
    * Handle a user command from a Discord message
@@ -29,8 +34,9 @@ abstract class BaseCommand {
     (async () => {
       // Parse the arguments (split by spaces and respecting quotes)
       const args = this.parseArgs(argString);
+      const channel = new CtfChannel(message.channel);
       // Execute the command in each subclass
-      await this.execute(message, args);
+      await this.execute(message, channel, args);
     })
       .call(this)
       .catch((error) => {

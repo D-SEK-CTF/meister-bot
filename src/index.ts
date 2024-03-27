@@ -60,7 +60,7 @@ client.on('messageCreate', (message) => {
     message.reply(
       `## Available commands\n\`${helpCommands.join(
         '`, \n`',
-      )}\`. \n\nSource code: [github.com/flagermeisters/meister-bot](https://github.com/flagermeisters/meister-bot)`,
+      )}\`. \n\nSource code: [github.com/flagermeisters/meister-bot](<https://github.com/flagermeisters/meister-bot>)`,
     );
     return;
   }

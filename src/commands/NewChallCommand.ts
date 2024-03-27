@@ -1,10 +1,9 @@
 import { CategoryChannel, ChannelType, Client } from 'discord.js';
 import { prefix } from '../const';
-import { getCategoryChannels } from '../utils/getCategoryChannels';
-import { solvedChannelName } from '../utils/solvedChannelName';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
-import { findChannelByName } from '../utils/findChannelByName';
+import { findCtfChannelByName } from '../utils/findCtfChannelByName';
+import { CtfChannel } from '../CtfChannel';
 
 class NewChallCommand extends BaseCommand {
   private adminRoleId: string;
@@ -16,14 +15,23 @@ class NewChallCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
+  async execute(
+    message: ValidMemberMessage,
+    channel: CtfChannel,
+    args: string[],
+  ): Promise<void> {
     this.assertArgsLengthRange(args, 1, 2);
     this.assertNotInGeneralChannel(message);
 
     const [channelName, ctfName] = args;
 
     const category = ctfName
-      ? findChannelByName(message, ctfName, ChannelType.GuildCategory, true)
+      ? findCtfChannelByName(
+          channel.categoryObject,
+          ctfName,
+          ChannelType.GuildCategory,
+          true,
+        )
       : message.channel.parent;
     this.assertValidCategory(category);
     this.assertChannelDoesNotExist(message, channelName, category);
@@ -59,17 +67,12 @@ class NewChallCommand extends BaseCommand {
     targetChannelName: string,
     category: CategoryChannel,
   ): void {
-    const categoryChannels = getCategoryChannels(message, category);
-    const targetChannelNameLower = targetChannelName.toLowerCase();
-
-    const channel = categoryChannels.find((channel) => {
-      const channelNameLower = channel.name.toLowerCase();
-
-      return (
-        channelNameLower === targetChannelNameLower ||
-        channelNameLower === solvedChannelName(targetChannelNameLower)
-      );
-    });
+    const channel = findCtfChannelByName(
+      category,
+      targetChannelName,
+      ChannelType.GuildText,
+      true,
+    );
 
     if (channel) {
       throw new Error(`Challenge <#${channel.id}> already exists.`);

@@ -1,8 +1,9 @@
 import { CategoryChannel, ChannelType, Client, Collection } from 'discord.js';
-import { archivedSuffix, prefix } from '../const';
+import { archivedCategorySuffix, prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
-import { findChannelByName } from '../utils/findChannelByName';
+import { findCtfChannelByName } from '../utils/findCtfChannelByName';
+import { CtfChannel } from '../CtfChannel';
 
 class ArchiveCommand extends BaseCommand {
   private adminRoleId: string;
@@ -14,21 +15,30 @@ class ArchiveCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
+  async execute(
+    message: ValidMemberMessage,
+    channel: CtfChannel,
+    args: string[],
+  ): Promise<void> {
     this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLengthRange(args, 0, 1);
 
     const [ctfName] = args;
 
     const category = ctfName
-      ? findChannelByName(message, ctfName, ChannelType.GuildCategory, true)
-      : message.channel.parent;
+      ? findCtfChannelByName(
+          channel.categoryObject,
+          ctfName,
+          ChannelType.GuildCategory,
+          true,
+        )
+      : channel.categoryObject;
 
     this.assertNotGeneralCategory(category);
     this.assertNotAlreadyArchived(category);
 
     // Rename the category to indicate it's archived
-    category.setName(`${category.name}${archivedSuffix}`);
+    category.setName(`${category.name}${archivedCategorySuffix}`);
 
     // Set the permissions to read only
     category.children.cache.forEach((channel) => {
@@ -58,7 +68,7 @@ class ArchiveCommand extends BaseCommand {
 
     // Filter out only the archived categories
     const archivedCategories = categories.filter((category) =>
-      category.name.endsWith(archivedSuffix),
+      category.name.endsWith(archivedCategorySuffix),
     );
 
     // If there are no archived categories, return the highest position index + 1
@@ -78,7 +88,7 @@ class ArchiveCommand extends BaseCommand {
    * @throws Error if the CTF is already archived
    */
   assertNotAlreadyArchived(category: CategoryChannel) {
-    if (category.name.endsWith(archivedSuffix)) {
+    if (category.name.endsWith(archivedCategorySuffix)) {
       throw new Error('CTF is already archived.');
     }
   }

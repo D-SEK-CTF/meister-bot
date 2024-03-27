@@ -1,8 +1,9 @@
-import { ChannelType, Client } from 'discord.js';
-import { archivedSuffix, discussionChannelName, prefix } from '../const';
-import { findChannelByName } from '../utils/findChannelByName';
+import { ChannelType, Client, Guild } from 'discord.js';
+import { archivedCategorySuffix, prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import BaseCommand from './BaseCommand';
+import { CtfChannel } from '../CtfChannel';
+import { findCtfByName } from '../utils/findCtfByName';
 
 class NewCTFCommand extends BaseCommand {
   private adminRoleId: string;
@@ -14,7 +15,11 @@ class NewCTFCommand extends BaseCommand {
     this.adminRoleId = adminRoleId;
   }
 
-  async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
+  async execute(
+    message: ValidMemberMessage,
+    commandChannel: CtfChannel,
+    args: string[],
+  ): Promise<void> {
     this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLengthRange(args, 1, 4);
 
@@ -22,17 +27,24 @@ class NewCTFCommand extends BaseCommand {
 
     if (ctfUrl) this.assertValidUrl(ctfUrl);
     this.assertChannelNameIsValid(categoryName);
-    this.assertChannelNotAlreadyExists(message, categoryName);
+    this.assertChannelNotAlreadyExists(
+      commandChannel.channelObject.guild,
+      categoryName,
+    );
 
     const category = await message.guild.channels.create({
       name: categoryName,
       type: ChannelType.GuildCategory,
     });
-    const textChannel = await message.guild.channels.create({
-      name: discussionChannelName,
+    const textChannel = (await message.guild.channels.create({
+      name: 'general',
       type: ChannelType.GuildText,
       parent: category.id,
-    });
+    })) as ValidMemberMessage['channel'];
+
+    // TODO: Less hacky way to rename the channel
+    const channel = new CtfChannel(textChannel);
+    channel.setEmptyName();
 
     // Move the category to the top
     await category.setPosition(1);
@@ -43,7 +55,7 @@ class NewCTFCommand extends BaseCommand {
       Username: ctfUsername,
       Password: ctfPassword,
     });
-    await textChannel.setTopic(topic);
+    channel.setTopic(topic);
 
     message.reply(`New CTF \`${category.name}\` created: <#${textChannel.id}>`);
   }
@@ -63,25 +75,19 @@ class NewCTFCommand extends BaseCommand {
   /**
    *
    * @param message The message object
-   * @param categoryName The name of the category
+   * @param ctfName The name of the category
    * @throws Error if the category already exists
    */
-  assertChannelNotAlreadyExists(
-    message: ValidMemberMessage,
-    categoryName: string,
-  ): void {
-    const channel =
-      findChannelByName(message, categoryName, ChannelType.GuildCategory) ||
-      findChannelByName(
-        message,
-        `${categoryName}${archivedSuffix}`,
-        ChannelType.GuildCategory,
-      );
-    if (channel) {
+  assertChannelNotAlreadyExists(guild: Guild, ctfName: string): void {
+    const ctfCategory =
+      findCtfByName(guild, ctfName) ||
+      findCtfByName(guild, `${ctfName}${archivedCategorySuffix}`);
+
+    if (ctfCategory) {
       throw new Error(
-        `CTF \`${channel.name}\` already exists: ${channel.children.cache.at(
-          0,
-        )}`,
+        `CTF \`${
+          ctfCategory.name
+        }\` already exists: ${ctfCategory.children.cache.at(0)}`,
       );
     }
   }
