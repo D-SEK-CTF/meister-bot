@@ -1,19 +1,15 @@
-import { CategoryChannel, ChannelType, Client } from 'discord.js';
+import { CategoryChannel, ChannelType } from 'discord.js';
 import { prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
-import BaseCommand from './BaseCommand';
+import Command from './BaseCommand';
 import { findCtfChannelByName } from '../utils/findCtfChannelByName';
 import { CtfChannel } from '../CtfChannel';
+import { findCtfByName } from '../utils/findCtfByName';
 
-class NewChallCommand extends BaseCommand {
-  private adminRoleId: string;
+class NewChallCommand extends Command {
   commandName = 'new chall';
   usageHelp = `${prefix} ${this.commandName} <CHALL-NAME> [CTF-NAME]`;
-
-  constructor(client: Client, adminRoleId: string) {
-    super(client);
-    this.adminRoleId = adminRoleId;
-  }
+  commandDescription = 'Create a new challenge in a CTF.';
 
   async execute(
     message: ValidMemberMessage,
@@ -26,27 +22,15 @@ class NewChallCommand extends BaseCommand {
     const [channelName, ctfName] = args;
 
     const category = ctfName
-      ? findCtfChannelByName(
-          channel.categoryObject,
-          ctfName,
-          ChannelType.GuildCategory,
-          true,
-        )
+      ? findCtfByName(channel.categoryObject.guild, ctfName, true)
       : message.channel.parent;
     this.assertValidCategory(category);
     this.assertChannelDoesNotExist(message, channelName, category);
 
-    const newChannel = await message.guild.channels.create({
-      name: channelName,
-      type: ChannelType.GuildText,
-      parent: category.id,
-    });
-    const newCtfChannel = new CtfChannel(newChannel);
-    newCtfChannel.setEmptyName();
-    newCtfChannel.moveToTop();
+    const newChannel = await CtfChannel.create(channelName, category);
 
     message.reply(
-      `New challenge <#${newChannel.id}> created under \`${category.name}\`.`,
+      `New challenge ${newChannel.ref} created under \`${category.name}\`.`,
     );
   }
 

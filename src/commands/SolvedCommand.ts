@@ -1,11 +1,12 @@
 import { prefix as meisterPrefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
-import BaseCommand from './BaseCommand';
+import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
 
-class SolvedCommand extends BaseCommand {
+class SolvedCommand extends Command {
   commandName = 'solved';
   usageHelp = `${meisterPrefix} ${this.commandName} <FLAG>`;
+  commandDescription = 'Solve a challenge given the flag.';
 
   async execute(
     message: ValidMemberMessage,

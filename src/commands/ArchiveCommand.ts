@@ -1,37 +1,26 @@
 import { CategoryChannel, ChannelType, Client, Collection } from 'discord.js';
 import { archivedCategorySuffix, prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
-import BaseCommand from './BaseCommand';
-import { findCtfChannelByName } from '../utils/findCtfChannelByName';
+import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
+import { findCtfByName } from '../utils/findCtfByName';
 
-class ArchiveCommand extends BaseCommand {
-  private adminRoleId: string;
+class ArchiveCommand extends Command {
   commandName = 'archive ctf';
   usageHelp = `${prefix} ${this.commandName} [CTF-NAME]`;
-
-  constructor(client: Client, adminRoleId: string) {
-    super(client);
-    this.adminRoleId = adminRoleId;
-  }
+  commandDescription = 'Archives a CTF, making it read-only.';
 
   async execute(
     message: ValidMemberMessage,
     channel: CtfChannel,
     args: string[],
   ): Promise<void> {
-    this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLengthRange(args, 0, 1);
 
     const [ctfName] = args;
 
     const category = ctfName
-      ? findCtfChannelByName(
-          channel.categoryObject,
-          ctfName,
-          ChannelType.GuildCategory,
-          true,
-        )
+      ? findCtfByName(channel.channelObject.guild, ctfName)
       : channel.categoryObject;
 
     this.assertNotGeneralCategory(category);

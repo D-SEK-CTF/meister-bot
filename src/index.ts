@@ -6,10 +6,13 @@ import NewChallCommand from './commands/NewChallCommand';
 import SolvedCommand from './commands/SolvedCommand';
 import TestRoleCommand from './commands/TestRoleCommand';
 import { adminRoleID, botToken, prefix } from './const';
-import { validateMessage } from './utils/validateMessage';
+import { validateMessage, ValidMemberMessage } from './utils/validateMessage';
 import HelpCommand from './commands/HelpCommand';
-import BaseCommand from './commands/BaseCommand';
+import Command from './commands/BaseCommand';
 import { CtfChannel } from './CtfChannel';
+import ResolvedCommand from './commands/ResolveCommand.1';
+import PingCommand from './commands/PingCommand';
+import VersionCommand from './commands/VersionCommand';
 
 const client = new Client({
   intents: [
@@ -32,11 +35,14 @@ if (!adminRoleID) {
 const commands = [
   new NewChallCommand(client, adminRoleID),
   new NewCTFCommand(client, adminRoleID),
-  new SolvedCommand(client),
-  new TestRoleCommand(client, adminRoleID),
+  new SolvedCommand(client, null),
+  new ResolvedCommand(client, null),
+  new TestRoleCommand(client, null, adminRoleID),
   new ArchiveCommand(client, adminRoleID),
+  new PingCommand(client, null),
+  new VersionCommand(client, null),
 ];
-commands.push(new HelpCommand(client, adminRoleID, commands));
+commands.push(new HelpCommand(client, null, commands));
 const commandNames = commands.map((command) => command.commandName);
 
 client.once('ready', () => {
@@ -48,7 +54,7 @@ client.on('messageCreate', (message) => {
   if (!message.inGuild()) return;
   if (!message.channel.parent) return;
 
-  const channel = new CtfChannel(message.channel);
+  const channel = CtfChannel.fromMessage(message as ValidMemberMessage);
   if (!channel.isEmpty) return;
 
   channel.setUnsolvedName();

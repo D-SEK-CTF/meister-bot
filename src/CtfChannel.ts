@@ -1,9 +1,13 @@
 import {
   CategoryChannel,
+  CategoryChildChannel,
   ChannelType,
+  Collection,
   GuildTextBasedChannel,
+  TextChannel,
   User,
 } from 'discord.js';
+import { ValidMemberMessage } from './utils/validateMessage';
 
 const solvedChannelPrefix = '🚩｜';
 const unsolvedChannelPrefix = '✍｜';
@@ -27,6 +31,10 @@ class CtfChannel {
       .replace(emptyChannelPrefix, '');
   }
 
+  get ref(): string {
+    return `<#${this.channelObject.id}>`;
+  }
+
   get isSolved(): boolean {
     return this.rawName.startsWith(solvedChannelPrefix);
   }
@@ -44,6 +52,49 @@ class CtfChannel {
     this.channelObject = channel;
     this.isDiscussion = this.rawName === discussionChannelName;
     this.categoryObject = channel.parent as CategoryChannel;
+  }
+
+  static async create(
+    name: string,
+    category: CategoryChannel,
+  ): Promise<CtfChannel> {
+    const newChannel = await category.guild.channels.create({
+      name,
+      type: ChannelType.GuildText,
+      parent: category.id,
+    });
+    const newCtfChannel = CtfChannel.fromChannel(newChannel);
+    newCtfChannel.setEmptyName();
+    newCtfChannel.moveToTop();
+    return newCtfChannel;
+  }
+
+  static fromMessage(message: ValidMemberMessage): CtfChannel {
+    return new CtfChannel(message.channel);
+  }
+
+  static fromChannel(channel: GuildTextBasedChannel): CtfChannel {
+    return new CtfChannel(channel);
+  }
+
+  static fromChannelCache(
+    channels: Collection<string, CategoryChildChannel>,
+  ): CtfChannel[] {
+    return channels
+      .filter((channel) => channel.type === ChannelType.GuildText)
+      .map((channel) => new CtfChannel(channel as GuildTextBasedChannel));
+  }
+
+  static fromName(
+    name: string,
+    category: CategoryChannel,
+  ): CtfChannel | undefined {
+    const channels = this.fromChannelCache(category.children.cache);
+    const channel = channels.find(
+      (channel) => channel.name.toLowerCase() === name.toLowerCase(),
+    );
+
+    return channel;
   }
 
   setSolvedName(): void {
@@ -108,6 +159,12 @@ class CtfChannel {
   assertNotSolved(): void {
     if (this.isSolved) {
       throw new Error('Challenge is already solved.');
+    }
+  }
+
+  assertSolved(): void {
+    if (!this.isSolved) {
+      throw new Error('Challenge is not solved.');
     }
   }
 

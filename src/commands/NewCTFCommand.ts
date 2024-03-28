@@ -1,26 +1,20 @@
 import { ChannelType, Client, Guild } from 'discord.js';
 import { archivedCategorySuffix, prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
-import BaseCommand from './BaseCommand';
+import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
 import { findCtfByName } from '../utils/findCtfByName';
 
-class NewCTFCommand extends BaseCommand {
-  private adminRoleId: string;
+class NewCTFCommand extends Command {
   commandName = 'new ctf';
   usageHelp = `${prefix} ${this.commandName} <CTF-NAME> [CTF-URL] [USERNAME] [PASSWORD]`;
-
-  constructor(client: Client, adminRoleId: string) {
-    super(client);
-    this.adminRoleId = adminRoleId;
-  }
+  commandDescription = 'Create a new CTF.';
 
   async execute(
     message: ValidMemberMessage,
     commandChannel: CtfChannel,
     args: string[],
   ): Promise<void> {
-    this.assertHasRole(message, this.adminRoleId);
     this.assertArgsLengthRange(args, 1, 4);
 
     const [categoryName, ctfUrl, ctfUsername, ctfPassword] = args;

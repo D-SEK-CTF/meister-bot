@@ -2,16 +2,20 @@ import { CategoryChannel, Client } from 'discord.js';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import { CtfChannel } from '../CtfChannel';
 
-abstract class BaseCommand {
+abstract class Command {
   client: Client;
+  requiredRole: string | null;
+  showInHelp = true;
   abstract commandName: string;
   abstract usageHelp: string;
+  abstract commandDescription: string;
 
-  constructor(client: Client) {
-    if (new.target === BaseCommand) {
+  constructor(client: Client, requiredRole: string | null) {
+    if (new.target === Command) {
       throw new TypeError('Cannot construct BaseCommand instances directly');
     }
     this.client = client;
+    this.requiredRole = requiredRole;
   }
 
   abstract execute(
@@ -32,6 +36,9 @@ abstract class BaseCommand {
   ): Promise<void> {
     // Ignore the function wrapper, it's just for better error handling
     (async () => {
+      // Check if the user has the required role
+      this.assertHasRequiredRole(message);
+
       // Parse the arguments (split by spaces and respecting quotes)
       const args = this.parseArgs(argString);
       const channel = new CtfChannel(message.channel);
@@ -116,9 +123,12 @@ abstract class BaseCommand {
    * }
    * ```
    */
-  hasRoleId(message: ValidMemberMessage, id: string): boolean {
+  hasRequiredRole(message: ValidMemberMessage, id?: string): boolean {
+    if (!id) return true;
+
+    const targetRole = id ?? this.requiredRole;
     return message.member
-      ? message.member.roles.cache.some((role) => role.id === id)
+      ? message.member.roles.cache.some((role) => role.id === targetRole)
       : false;
   }
 
@@ -215,11 +225,11 @@ abstract class BaseCommand {
    * @param roleId - Role ID
    * @throws Error if the user does not have the role
    */
-  assertHasRole(message: ValidMemberMessage, roleId: string): void {
-    if (!this.hasRoleId(message, roleId)) {
+  assertHasRequiredRole(message: ValidMemberMessage): void {
+    if (!this.hasRequiredRole(message)) {
       throw new Error('You do not have permission to use this command.');
     }
   }
 }
 
-export default BaseCommand;
+export default Command;
