@@ -4,7 +4,6 @@ import {
   ChannelType,
   Collection,
   GuildTextBasedChannel,
-  TextChannel,
   User,
 } from 'discord.js';
 import { ValidMemberMessage } from './utils/validateMessage';
@@ -54,7 +53,7 @@ class CtfChannel {
     this.categoryObject = channel.parent as CategoryChannel;
   }
 
-  static async create(
+  static async createChall(
     name: string,
     category: CategoryChannel,
   ): Promise<CtfChannel> {
@@ -66,6 +65,19 @@ class CtfChannel {
     const newCtfChannel = CtfChannel.fromChannel(newChannel);
     newCtfChannel.setEmptyName();
     newCtfChannel.moveToTop();
+    return newCtfChannel;
+  }
+
+  static async createDiscussion(
+    category: CategoryChannel,
+  ): Promise<CtfChannel> {
+    const newChannel = await category.guild.channels.create({
+      name: discussionChannelName,
+      type: ChannelType.GuildText,
+      parent: category.id,
+    });
+    const newCtfChannel = CtfChannel.fromChannel(newChannel);
+    newCtfChannel.setDiscussionName();
     return newCtfChannel;
   }
 
@@ -107,6 +119,10 @@ class CtfChannel {
 
   setEmptyName(): void {
     this.channelObject.setName(`${emptyChannelPrefix}${this.name}`);
+  }
+
+  setDiscussionName(): void {
+    this.channelObject.setName(discussionChannelName);
   }
 
   isGeneral(): boolean {
@@ -151,7 +167,10 @@ class CtfChannel {
       this.channelObject.type === ChannelType.GuildText ||
       this.channelObject.type === ChannelType.GuildVoice
     ) {
-      const lastPosition = this.categoryObject.children.cache.last()!.position;
+      const lastPosition = this.categoryObject.children.cache.reduce(
+        (acc, val) => Math.max(acc, val.position),
+        0,
+      );
       this.channelObject.setPosition(lastPosition);
     }
   }

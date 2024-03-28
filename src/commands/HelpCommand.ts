@@ -6,7 +6,7 @@ import { CtfChannel } from '../CtfChannel';
 
 class HelpCommand extends Command {
   commandName = 'help';
-  usageHelp = `${prefix} ${this.commandName} ["all" | command-name]`;
+  usageHelp = `${prefix} ${this.commandName} ["all" | COMMAND-NAME]`;
   commandDescription = 'Show help for a specific command.';
   commands: Command[];
   helpCommands: string[];

@@ -1,4 +1,4 @@
-import { CategoryChannel, ChannelType, Client, Collection } from 'discord.js';
+import { CategoryChannel, ChannelType, Collection } from 'discord.js';
 import { archivedCategorySuffix, prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import Command from './BaseCommand';

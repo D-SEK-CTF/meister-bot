@@ -27,7 +27,7 @@ class NewChallCommand extends Command {
     this.assertValidCategory(category);
     this.assertChannelDoesNotExist(message, channelName, category);
 
-    const newChannel = await CtfChannel.create(channelName, category);
+    const newChannel = await CtfChannel.createChall(channelName, category);
 
     message.reply(
       `New challenge ${newChannel.ref} created under \`${category.name}\`.`,

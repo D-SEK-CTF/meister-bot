@@ -8,7 +8,6 @@ import TestRoleCommand from './commands/TestRoleCommand';
 import { adminRoleID, botToken, prefix } from './const';
 import { validateMessage, ValidMemberMessage } from './utils/validateMessage';
 import HelpCommand from './commands/HelpCommand';
-import Command from './commands/BaseCommand';
 import { CtfChannel } from './CtfChannel';
 import ResolvedCommand from './commands/ResolveCommand.1';
 import PingCommand from './commands/PingCommand';

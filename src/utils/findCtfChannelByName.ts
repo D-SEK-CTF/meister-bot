@@ -3,7 +3,6 @@ import {
   ChannelType,
   DMChannel,
   MappedGuildChannelTypes,
-  Message,
   StageChannel,
   TextChannel,
   VoiceChannel,

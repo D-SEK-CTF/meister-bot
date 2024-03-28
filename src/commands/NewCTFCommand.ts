@@ -1,4 +1,4 @@
-import { ChannelType, Client, Guild } from 'discord.js';
+import { ChannelType, Guild } from 'discord.js';
 import { archivedCategorySuffix, prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import Command from './BaseCommand';
@@ -30,15 +30,7 @@ class NewCTFCommand extends Command {
       name: categoryName,
       type: ChannelType.GuildCategory,
     });
-    const textChannel = (await message.guild.channels.create({
-      name: 'general',
-      type: ChannelType.GuildText,
-      parent: category.id,
-    })) as ValidMemberMessage['channel'];
-
-    // TODO: Less hacky way to rename the channel
-    const channel = new CtfChannel(textChannel);
-    channel.setEmptyName();
+    const channel = await CtfChannel.createDiscussion(category);
 
     // Move the category to the top
     await category.setPosition(1);
@@ -51,7 +43,7 @@ class NewCTFCommand extends Command {
     });
     channel.setTopic(topic);
 
-    message.reply(`New CTF \`${category.name}\` created: <#${textChannel.id}>`);
+    message.reply(`New CTF \`${category.name}\` created: ${channel.ref}`);
   }
 
   createTopicString(topic: Record<string, string>): string {
