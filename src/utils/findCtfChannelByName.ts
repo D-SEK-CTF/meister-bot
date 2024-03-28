@@ -39,8 +39,8 @@ function findCtfChannelByName<T extends ChannelType>(
       (!type || channel.channelObject.type === type),
   );
 
-  if (assertNotExists && !channel) {
-    throw new Error(`Channel ${channelName} not found.`);
+  if (assertNotExists && channel) {
+    throw new Error(`Channel \`${channelName}\` already exists.`);
   }
 
   return channel?.channelObject as MappedChannelTypes[T];

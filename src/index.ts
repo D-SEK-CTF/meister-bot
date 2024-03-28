@@ -7,6 +7,9 @@ import SolvedCommand from './commands/SolvedCommand';
 import TestRoleCommand from './commands/TestRoleCommand';
 import { adminRoleID, botToken, prefix } from './const';
 import { validateMessage } from './utils/validateMessage';
+import HelpCommand from './commands/HelpCommand';
+import BaseCommand from './commands/BaseCommand';
+import { CtfChannel } from './CtfChannel';
 
 const client = new Client({
   intents: [
@@ -33,11 +36,22 @@ const commands = [
   new TestRoleCommand(client, adminRoleID),
   new ArchiveCommand(client, adminRoleID),
 ];
+commands.push(new HelpCommand(client, adminRoleID, commands));
 const commandNames = commands.map((command) => command.commandName);
-const helpCommands = commands.map((command) => command.usageHelp);
 
 client.once('ready', () => {
   console.log('Meister is ready!');
+});
+
+client.on('messageCreate', (message) => {
+  if (message.author.bot || !message.member) return;
+  if (!message.inGuild()) return;
+  if (!message.channel.parent) return;
+
+  const channel = new CtfChannel(message.channel);
+  if (!channel.isEmpty) return;
+
+  channel.setUnsolvedName();
 });
 
 client.on('messageCreate', (message) => {
@@ -53,16 +67,6 @@ client.on('messageCreate', (message) => {
       command.handleCommand(message, argString);
       return;
     }
-  }
-
-  // Help command
-  if (botCommand === 'help') {
-    message.reply(
-      `## Available commands\n\`${helpCommands.join(
-        '`, \n`',
-      )}\`. \n\nSource code: [github.com/flagermeisters/meister-bot](<https://github.com/flagermeisters/meister-bot>)`,
-    );
-    return;
   }
 
   // Fuzzy matching

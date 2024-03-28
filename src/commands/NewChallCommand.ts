@@ -21,7 +21,7 @@ class NewChallCommand extends BaseCommand {
     args: string[],
   ): Promise<void> {
     this.assertArgsLengthRange(args, 1, 2);
-    this.assertNotInGeneralChannel(message);
+    channel.assertNotInDiscussion();
 
     const [channelName, ctfName] = args;
 
@@ -41,6 +41,9 @@ class NewChallCommand extends BaseCommand {
       type: ChannelType.GuildText,
       parent: category.id,
     });
+    const newCtfChannel = new CtfChannel(newChannel);
+    newCtfChannel.setEmptyName();
+    newCtfChannel.moveToTop();
 
     message.reply(
       `New challenge <#${newChannel.id}> created under \`${category.name}\`.`,

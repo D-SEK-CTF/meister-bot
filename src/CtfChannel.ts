@@ -4,45 +4,53 @@ import {
   GuildTextBasedChannel,
   User,
 } from 'discord.js';
-import { ValidMemberMessage } from './utils/validateMessage';
 
 const solvedChannelPrefix = '🚩｜';
-const unsolvedChannelPrefix = '✍️｜';
+const unsolvedChannelPrefix = '✍｜';
 const emptyChannelPrefix = '🆕｜';
 const discussionChannelName = '🗣️｜discussion';
 
 class CtfChannel {
-  name: string;
-  rawName: string;
   category?: string;
   categoryObject: CategoryChannel;
   isDiscussion: boolean;
-  isSolved: boolean;
-  isUnsolved: boolean;
-  isEmpty: boolean;
   channelObject: GuildTextBasedChannel;
 
-  constructor(channel: GuildTextBasedChannel) {
-    this.rawName = channel.name;
-    this.category = channel.parent?.name;
-    this.isDiscussion = this.rawName === discussionChannelName;
-    this.isSolved = this.rawName.startsWith(solvedChannelPrefix);
-    this.isUnsolved = this.rawName.startsWith(unsolvedChannelPrefix);
-    this.isEmpty = this.rawName.startsWith(emptyChannelPrefix);
-    this.channelObject = channel;
-    this.categoryObject = channel.parent as CategoryChannel;
+  get rawName(): string {
+    return this.channelObject.name;
+  }
 
-    this.name = this.rawName
+  get name(): string {
+    return this.rawName
       .replace(solvedChannelPrefix, '')
       .replace(unsolvedChannelPrefix, '')
       .replace(emptyChannelPrefix, '');
+  }
+
+  get isSolved(): boolean {
+    return this.rawName.startsWith(solvedChannelPrefix);
+  }
+
+  get isUnsolved(): boolean {
+    return this.rawName.startsWith(unsolvedChannelPrefix);
+  }
+
+  get isEmpty(): boolean {
+    return this.rawName.startsWith(emptyChannelPrefix);
+  }
+
+  constructor(channel: GuildTextBasedChannel) {
+    this.category = channel.parent?.name;
+    this.channelObject = channel;
+    this.isDiscussion = this.rawName === discussionChannelName;
+    this.categoryObject = channel.parent as CategoryChannel;
   }
 
   setSolvedName(): void {
     this.channelObject.setName(`${solvedChannelPrefix}${this.name}`);
   }
 
-  setUnsolved(): void {
+  setUnsolvedName(): void {
     this.channelObject.setName(`${unsolvedChannelPrefix}${this.name}`);
   }
 
@@ -73,6 +81,18 @@ class CtfChannel {
       });
 
     return Array.from(members);
+  }
+
+  moveToTop(): void {
+    if (
+      this.channelObject.type === ChannelType.GuildText ||
+      this.channelObject.type === ChannelType.GuildVoice
+    ) {
+      // Move the channel to under the general channel
+      this.channelObject.setPosition(1);
+    } else {
+      throw new Error('Cannot move a non-text channel to the top.');
+    }
   }
 
   moveToBottom(): void {

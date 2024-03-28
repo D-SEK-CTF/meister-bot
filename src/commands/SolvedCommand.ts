@@ -33,7 +33,7 @@ class SolvedCommand extends BaseCommand {
     channel.moveToBottom();
 
     message.reply(
-      `:confetti_ball: Good job ${formattedChallengeParticipants}! Challenge was solved with flag \`${flag}\` :confetti_ball:`,
+      `Challenge was solved with flag: \`${flag}\`\n:confetti_ball: Good job ${formattedChallengeParticipants}! :confetti_ball:`,
     );
   }
 }
