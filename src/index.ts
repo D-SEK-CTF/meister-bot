@@ -33,7 +33,7 @@ if (!adminRoleID) {
 }
 
 const commands = [
-  new NewChallCommand(client, adminRoleID),
+  new NewChallCommand(client, null),
   new NewCTFCommand(client, adminRoleID),
   new SolvedCommand(client, null),
   new ResolvedCommand(client, null),

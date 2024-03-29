@@ -68,8 +68,8 @@ abstract class Command {
    * ```
    */
   parseArgs(content: string): string[] {
-    // Parse the arguments with quotes, both single and double
-    const validQuotes = ["'", '"'];
+    // Parse the arguments with quotes
+    const validQuotes = ["'", '"', '”'];
     let lastQuote = '';
     let currentArg = '';
     const args: string[] = [];
@@ -127,9 +127,10 @@ abstract class Command {
    * ```
    */
   hasRequiredRole(message: ValidMemberMessage, id?: string): boolean {
-    if (!id) return true;
-
     const targetRole = id ?? this.requiredRole;
+
+    if (targetRole === null) return true;
+
     return message.member
       ? message.member.roles.cache.some((role) => role.id === targetRole)
       : false;
