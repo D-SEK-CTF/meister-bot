@@ -1,9 +1,9 @@
-import { ChannelType, Guild } from 'discord.js';
-import { archivedCategorySuffix, prefix } from '../const';
+import { Guild } from 'discord.js';
+import { prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
-import { findCtfByName } from '../utils/findCtfByName';
+import { CtfCategory } from '../CtfCategory';
 
 class NewCTFCommand extends Command {
   commandName = 'new ctf';
@@ -13,6 +13,7 @@ class NewCTFCommand extends Command {
   async execute(
     message: ValidMemberMessage,
     commandChannel: CtfChannel,
+    commandCategory: CtfCategory,
     args: string[],
   ): Promise<void> {
     this.assertArgsLengthRange(args, 1, 4);
@@ -22,18 +23,15 @@ class NewCTFCommand extends Command {
     if (ctfUrl) this.assertValidUrl(ctfUrl);
     this.assertChannelNameIsValid(categoryName);
     this.assertChannelNotAlreadyExists(
-      commandChannel.channelObject.guild,
+      commandCategory.object.guild,
       categoryName,
     );
 
-    const category = await message.guild.channels.create({
-      name: categoryName,
-      type: ChannelType.GuildCategory,
-    });
+    const category = await CtfCategory.createCTF(categoryName, message.guild);
     const channel = await CtfChannel.createDiscussion(category);
 
     // Move the category to the top
-    await category.setPosition(1);
+    category.moveToTop();
 
     // Write the URL, username, and password to the channel topic
     const topic = this.createTopicString({
@@ -65,15 +63,13 @@ class NewCTFCommand extends Command {
    * @throws Error if the category already exists
    */
   assertChannelNotAlreadyExists(guild: Guild, ctfName: string): void {
-    const ctfCategory =
-      findCtfByName(guild, ctfName) ||
-      findCtfByName(guild, `${ctfName}${archivedCategorySuffix}`);
+    const ctfCategory = CtfCategory.fromName(ctfName, guild);
 
     if (ctfCategory) {
       throw new Error(
-        `CTF \`${
-          ctfCategory.name
-        }\` already exists: ${ctfCategory.children.cache.at(0)}`,
+        `CTF \`${ctfCategory.name}\` already exists: ${ctfCategory.children.at(
+          0,
+        )}`,
       );
     }
   }

@@ -1,6 +1,7 @@
-import { CategoryChannel, Client } from 'discord.js';
+import { Client } from 'discord.js';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import { CtfChannel } from '../CtfChannel';
+import { CtfCategory } from '../CtfCategory';
 
 abstract class Command {
   client: Client;
@@ -20,7 +21,8 @@ abstract class Command {
 
   abstract execute(
     message: ValidMemberMessage,
-    channel: CtfChannel,
+    commandChannel: CtfChannel,
+    commandCategory: CtfCategory,
     args: string[],
   ): Promise<void>;
 
@@ -41,9 +43,10 @@ abstract class Command {
 
       // Parse the arguments (split by spaces and respecting quotes)
       const args = this.parseArgs(argString);
-      const channel = new CtfChannel(message.channel);
+      const channel = CtfChannel.fromMessage(message);
+      const category = CtfCategory.fromMessage(message);
       // Execute the command in each subclass
-      await this.execute(message, channel, args);
+      await this.execute(message, channel, category, args);
     })
       .call(this)
       .catch((error) => {
@@ -133,19 +136,6 @@ abstract class Command {
   }
 
   /**
-   * Reply to the message with the usage help
-   *
-   * @param message - Discord message
-   * @example
-   * ```ts
-   * this.sendUsageHelp(message);
-   * ```
-   */
-  sendUsageHelp(message: ValidMemberMessage): void {
-    message.reply(`Usage: ${this.usageHelp}`);
-  }
-
-  /**
    * Assert that the number of arguments is equal to a specific length
    *
    * @param args - Arguments
@@ -185,36 +175,6 @@ abstract class Command {
           max === 1 ? 'argument' : 'arguments'
         }, received ${args.length}.\n\nUsage: \`${this.usageHelp}\``,
       );
-    }
-  }
-
-  /**
-   * Assert that the message was sent in a challenge channel
-   *
-   * @param message - Discord message
-   * @throws Error if the message was not sent in a challenge channel
-   */
-  assertNotInGeneralChannel(message: ValidMemberMessage): void {
-    if (message.channel.parent.name === 'general') {
-      throw new Error('Please use this command inside a challenge channel.');
-    }
-  }
-
-  assertNotGeneralCategory(category: CategoryChannel): void {
-    if (category.name === 'general') {
-      throw new Error('Please use this command inside a CTF category.');
-    }
-  }
-
-  /**
-   * Assert that the message was sent in a text channel
-   *
-   * @param message - Discord message
-   * @throws Error if the message was not sent in a text channel
-   */
-  assertInTextChannel(message: ValidMemberMessage): void {
-    if (!message.channel.isTextBased()) {
-      throw new Error('This command can only be used in a text channel.');
     }
   }
 

@@ -3,6 +3,8 @@ import { prefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
+import fuzzyMatch from '../utils/fuzzyMatch';
+import { CtfCategory } from '../CtfCategory';
 
 class HelpCommand extends Command {
   commandName = 'help';
@@ -25,7 +27,8 @@ class HelpCommand extends Command {
 
   async execute(
     message: ValidMemberMessage,
-    channel: CtfChannel,
+    commandChannel: CtfChannel,
+    commandCategory: CtfCategory,
     args: string[],
   ): Promise<void> {
     this.assertArgsLengthRange(args, 0, 1);
@@ -53,8 +56,16 @@ class HelpCommand extends Command {
     );
 
     if (!command) {
-      message.reply(`Command \`${commandName}\` not found.`);
-      return;
+      const matches = fuzzyMatch(commandName, this.commandNames);
+      if (matches.length === 0) {
+        throw Error(`Command \`${commandName}\` not found.`);
+      } else {
+        throw Error(
+          `Command \`${commandName}\` not found. Did you mean \`${matches.join(
+            '`, `',
+          )}\`?`,
+        );
+      }
     }
 
     message.reply(

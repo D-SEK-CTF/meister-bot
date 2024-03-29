@@ -7,6 +7,7 @@ import {
   User,
 } from 'discord.js';
 import { ValidMemberMessage } from './utils/validateMessage';
+import { CtfCategory } from './CtfCategory';
 
 const solvedChannelPrefix = '🚩｜';
 const unsolvedChannelPrefix = '✍｜';
@@ -15,12 +16,13 @@ const discussionChannelName = '🗣️｜discussion';
 
 class CtfChannel {
   category?: string;
-  categoryObject: CategoryChannel;
   isDiscussion: boolean;
-  channelObject: GuildTextBasedChannel;
+
+  private categoryObject: CategoryChannel;
+  private object: GuildTextBasedChannel;
 
   get rawName(): string {
-    return this.channelObject.name;
+    return this.object.name;
   }
 
   get name(): string {
@@ -31,7 +33,7 @@ class CtfChannel {
   }
 
   get ref(): string {
-    return `<#${this.channelObject.id}>`;
+    return `<#${this.object.id}>`;
   }
 
   get isSolved(): boolean {
@@ -48,37 +50,23 @@ class CtfChannel {
 
   constructor(channel: GuildTextBasedChannel) {
     this.category = channel.parent?.name;
-    this.channelObject = channel;
+    this.object = channel;
     this.isDiscussion = this.rawName === discussionChannelName;
     this.categoryObject = channel.parent as CategoryChannel;
   }
 
   static async createChall(
     name: string,
-    category: CategoryChannel,
+    category: CtfCategory,
   ): Promise<CtfChannel> {
-    const newChannel = await category.guild.channels.create({
-      name,
-      type: ChannelType.GuildText,
-      parent: category.id,
-    });
-    const newCtfChannel = CtfChannel.fromChannel(newChannel);
+    const newCtfChannel = await CtfCategory.createChannel(name, category);
     newCtfChannel.setEmptyName();
     newCtfChannel.moveToTop();
     return newCtfChannel;
   }
 
-  static async createDiscussion(
-    category: CategoryChannel,
-  ): Promise<CtfChannel> {
-    const newChannel = await category.guild.channels.create({
-      name: discussionChannelName,
-      type: ChannelType.GuildText,
-      parent: category.id,
-    });
-    const newCtfChannel = CtfChannel.fromChannel(newChannel);
-    newCtfChannel.setDiscussionName();
-    return newCtfChannel;
+  static async createDiscussion(category: CtfCategory): Promise<CtfChannel> {
+    return await CtfCategory.createChannel(discussionChannelName, category);
   }
 
   static fromMessage(message: ValidMemberMessage): CtfChannel {
@@ -97,11 +85,8 @@ class CtfChannel {
       .map((channel) => new CtfChannel(channel as GuildTextBasedChannel));
   }
 
-  static fromName(
-    name: string,
-    category: CategoryChannel,
-  ): CtfChannel | undefined {
-    const channels = this.fromChannelCache(category.children.cache);
+  static fromName(name: string, category: CtfCategory): CtfChannel | undefined {
+    const channels = this.fromChannelCache(category.children);
     const channel = channels.find(
       (channel) => channel.name.toLowerCase() === name.toLowerCase(),
     );
@@ -110,19 +95,19 @@ class CtfChannel {
   }
 
   setSolvedName(): void {
-    this.channelObject.setName(`${solvedChannelPrefix}${this.name}`);
+    this.object.setName(`${solvedChannelPrefix}${this.name}`);
   }
 
   setUnsolvedName(): void {
-    this.channelObject.setName(`${unsolvedChannelPrefix}${this.name}`);
+    this.object.setName(`${unsolvedChannelPrefix}${this.name}`);
   }
 
   setEmptyName(): void {
-    this.channelObject.setName(`${emptyChannelPrefix}${this.name}`);
+    this.object.setName(`${emptyChannelPrefix}${this.name}`);
   }
 
   setDiscussionName(): void {
-    this.channelObject.setName(discussionChannelName);
+    this.object.setName(discussionChannelName);
   }
 
   isGeneral(): boolean {
@@ -130,15 +115,13 @@ class CtfChannel {
   }
 
   setTopic(topic: string): void {
-    if (!this.channelObject.isThread() && !this.channelObject.isVoiceBased())
-      this.channelObject.setTopic(topic);
+    if (!this.object.isThread() && !this.object.isVoiceBased())
+      this.object.setTopic(topic);
   }
 
   participatingMembers(): User[] {
     // Gets all members who have sent a message in the channel
-    const authors = this.channelObject.messages.cache.map(
-      (message) => message.author,
-    );
+    const authors = this.object.messages.cache.map((message) => message.author);
     const members = new Set<User>();
 
     authors
@@ -152,11 +135,11 @@ class CtfChannel {
 
   moveToTop(): void {
     if (
-      this.channelObject.type === ChannelType.GuildText ||
-      this.channelObject.type === ChannelType.GuildVoice
+      this.object.type === ChannelType.GuildText ||
+      this.object.type === ChannelType.GuildVoice
     ) {
       // Move the channel to under the general channel
-      this.channelObject.setPosition(1);
+      this.object.setPosition(1);
     } else {
       throw new Error('Cannot move a non-text channel to the top.');
     }
@@ -164,14 +147,14 @@ class CtfChannel {
 
   moveToBottom(): void {
     if (
-      this.channelObject.type === ChannelType.GuildText ||
-      this.channelObject.type === ChannelType.GuildVoice
+      this.object.type === ChannelType.GuildText ||
+      this.object.type === ChannelType.GuildVoice
     ) {
       const lastPosition = this.categoryObject.children.cache.reduce(
         (acc, val) => Math.max(acc, val.position),
         0,
       );
-      this.channelObject.setPosition(lastPosition);
+      this.object.setPosition(lastPosition);
     }
   }
 

@@ -2,6 +2,7 @@ import { prefix as meisterPrefix } from '../const';
 import { ValidMemberMessage } from '../utils/validateMessage';
 import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
+import { CtfCategory } from '../CtfCategory';
 
 class ResolvedCommand extends Command {
   commandName = 'resolve';
@@ -11,7 +12,8 @@ class ResolvedCommand extends Command {
 
   async execute(
     message: ValidMemberMessage,
-    channel: CtfChannel,
+    commandChannel: CtfChannel,
+    commandCategory: CtfCategory,
     args: string[],
   ): Promise<void> {
     // Extract the challenge name from the arguments
@@ -19,9 +21,12 @@ class ResolvedCommand extends Command {
     const [flag] = args;
 
     // Check if the command was used in the correct channel
-    channel.assertSolved();
-    channel.assertNotInGeneral();
-    channel.assertNotInDiscussion();
+    commandChannel.assertSolved();
+    commandChannel.assertNotInGeneral();
+    commandChannel.assertNotInDiscussion();
+
+    // Update the channel name if stuck
+    commandChannel.setSolvedName();
 
     message.reply(`Challenge was re-solved with flag: \`${flag}\``);
   }

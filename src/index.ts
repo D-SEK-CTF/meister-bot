@@ -1,5 +1,4 @@
 import { Client, GatewayIntentBits } from 'discord.js';
-import { Searcher } from 'fast-fuzzy';
 import ArchiveCommand from './commands/ArchiveCommand';
 import NewCTFCommand from './commands/NewCTFCommand';
 import NewChallCommand from './commands/NewChallCommand';
@@ -9,9 +8,11 @@ import { adminRoleID, botToken, prefix } from './const';
 import { validateMessage, ValidMemberMessage } from './utils/validateMessage';
 import HelpCommand from './commands/HelpCommand';
 import { CtfChannel } from './CtfChannel';
-import ResolvedCommand from './commands/ResolveCommand.1';
+import ResolvedCommand from './commands/ResolveCommand';
 import PingCommand from './commands/PingCommand';
 import VersionCommand from './commands/VersionCommand';
+import UnsolveCommand from './commands/UnsolveCommand';
+import fuzzyMatch from './utils/fuzzyMatch';
 
 const client = new Client({
   intents: [
@@ -36,6 +37,7 @@ const commands = [
   new NewCTFCommand(client, adminRoleID),
   new SolvedCommand(client, null),
   new ResolvedCommand(client, null),
+  new UnsolveCommand(client, null),
   new TestRoleCommand(client, null, adminRoleID),
   new ArchiveCommand(client, adminRoleID),
   new PingCommand(client, null),
@@ -76,10 +78,7 @@ client.on('messageCreate', (message) => {
 
   // Fuzzy matching
   const commandName = botCommand.split(' ')[0];
-  const searcher = new Searcher(commandNames);
-  const matches = searcher.search(commandName, {
-    threshold: 0.5,
-  });
+  const matches = fuzzyMatch(commandName, commandNames);
   let response = 'Invalid command.';
   if (matches.length > 0) {
     response += ` Did you mean: \`${matches.join('`, `')}\`?`;
