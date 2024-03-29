@@ -12,7 +12,7 @@ ADMIN_ROLE_ID=<ADMIN_ROLE_ID>
 ```
 `DISCORD_BOT_TOKEN`: The secret token for the bot. Can be found after creating a new bot at https://discord.com/developers/applications.
 
-`ADMIN_ROLE_ID`: The ID of the roles that should be able to create new CTFs. Simply go to the discord channel, right-click on the role and select "Copy Role ID" to find the value.
+`ADMIN_ROLE_ID`: The ID of the roles that should be able to create new CTFs. Simply go to the discord chanel, right-click on the role and select "Copy Role ID" to find the value.
 
 **NOTE**: More information on how to create a discord bot can be found here: https://discordpy.readthedocs.io/en/stable/discord.html
 
@@ -58,9 +58,9 @@ meister help
 ```
 
 ### New CTF
-Creates a new CTF, and a channel called "discussion" under it.
+Creates a new CTF, and a chanel called "discussion" under it.
 
-If provided, the url, username, and password will be included in the channel topic in the discussion chanel.
+If provided, the url, username, and password will be included in the chanel topic in the discussion chanel.
 ```
 meister new ctf <CTF-NAME> [CTF-URL] [USERNAME] [PASSWORD]
 ```

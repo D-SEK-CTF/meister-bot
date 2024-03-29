@@ -21,8 +21,8 @@ class SolvedCommand extends Command {
 
     // Check if the command was used in the correct channel
     commandChannel.assertNotSolved();
-    commandChannel.assertNotInGeneral();
     commandChannel.assertNotInDiscussion();
+    commandCategory.assertNotInGeneral();
 
     // Rename the channel and reply to the user
     commandChannel.setSolvedName();

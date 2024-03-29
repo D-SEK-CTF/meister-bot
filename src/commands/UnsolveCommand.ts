@@ -21,7 +21,7 @@ class UnsolveCommand extends Command {
 
     // Check if the command was used in the correct channel
     commandChannel.assertSolved();
-    commandChannel.assertNotInGeneral();
+    commandCategory.assertNotInGeneral();
     commandChannel.assertNotInDiscussion();
 
     // Rename the channel and reply to the user

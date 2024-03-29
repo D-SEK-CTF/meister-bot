@@ -16,7 +16,8 @@ class NewChallCommand extends Command {
     args: string[],
   ): Promise<void> {
     this.assertArgsLengthRange(args, 1, 2);
-    commandChannel.assertNotInDiscussion();
+    commandCategory.assertNotInGeneral();
+    commandChannel.assertNotChallenge();
 
     const [channelName, ctfName] = args;
 

@@ -12,11 +12,10 @@ import { CtfCategory } from './CtfCategory';
 const solvedChannelPrefix = '🚩｜';
 const unsolvedChannelPrefix = '✍｜';
 const emptyChannelPrefix = '🆕｜';
-const discussionChannelName = '🗣️｜discussion';
+const discussionChannelName = '💬｜discussion';
 
 class CtfChannel {
   category?: string;
-  isDiscussion: boolean;
 
   private categoryObject: CategoryChannel;
   private object: GuildTextBasedChannel;
@@ -48,10 +47,17 @@ class CtfChannel {
     return this.rawName.startsWith(emptyChannelPrefix);
   }
 
+  get isDiscussion(): boolean {
+    return this.rawName === discussionChannelName;
+  }
+
+  get isChallengeChannel(): boolean {
+    return this.name !== this.rawName;
+  }
+
   constructor(channel: GuildTextBasedChannel) {
     this.category = channel.parent?.name;
     this.object = channel;
-    this.isDiscussion = this.rawName === discussionChannelName;
     this.categoryObject = channel.parent as CategoryChannel;
   }
 
@@ -59,8 +65,10 @@ class CtfChannel {
     name: string,
     category: CtfCategory,
   ): Promise<CtfChannel> {
-    const newCtfChannel = await CtfCategory.createChannel(name, category);
-    newCtfChannel.setEmptyName();
+    const newCtfChannel = await CtfCategory.createChannel(
+      CtfChannel.getEmptyName(name),
+      category,
+    );
     newCtfChannel.moveToTop();
     return newCtfChannel;
   }
@@ -88,30 +96,40 @@ class CtfChannel {
   static fromName(name: string, category: CtfCategory): CtfChannel | undefined {
     const channels = this.fromChannelCache(category.children);
     const channel = channels.find(
-      (channel) => channel.name.toLowerCase() === name.toLowerCase(),
+      (channel) =>
+        channel.name.toLowerCase() ===
+        name.trim().replace(' ', '-').toLowerCase(),
     );
 
     return channel;
   }
 
+  static getSolvedName(name: string): string {
+    return `${solvedChannelPrefix}${name}`;
+  }
+
+  static getUnsolvedName(name: string): string {
+    return `${unsolvedChannelPrefix}${name}`;
+  }
+
+  static getEmptyName(name: string): string {
+    return `${emptyChannelPrefix}${name}`;
+  }
+
   setSolvedName(): void {
-    this.object.setName(`${solvedChannelPrefix}${this.name}`);
+    this.object.setName(CtfChannel.getSolvedName(this.name));
   }
 
   setUnsolvedName(): void {
-    this.object.setName(`${unsolvedChannelPrefix}${this.name}`);
+    this.object.setName(CtfChannel.getUnsolvedName(this.name));
   }
 
   setEmptyName(): void {
-    this.object.setName(`${emptyChannelPrefix}${this.name}`);
+    this.object.setName(CtfChannel.getEmptyName(this.name));
   }
 
   setDiscussionName(): void {
     this.object.setName(discussionChannelName);
-  }
-
-  isGeneral(): boolean {
-    return this.category === 'general';
   }
 
   setTopic(topic: string): void {
@@ -170,9 +188,11 @@ class CtfChannel {
     }
   }
 
-  assertNotInGeneral(): void {
-    if (this.isGeneral()) {
-      throw new Error('Please use this command inside a challenge category.');
+  assertNotChallenge(): void {
+    if (this.isChallengeChannel) {
+      throw new Error(
+        "Please don't use this command inside a challenge channel.",
+      );
     }
   }
 
