@@ -10,7 +10,7 @@ class PingCommand extends Command {
 
   async execute(message: ValidMemberMessage): Promise<void> {
     const responseTime = Date.now() - message.createdTimestamp;
-    message.reply(`Pong! Response time: \`${responseTime}ms\``);
+    message.reply(`Response time: \`${responseTime}ms\``);
   }
 }
 
