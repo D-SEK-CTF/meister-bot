@@ -12,7 +12,7 @@ ADMIN_ROLE_ID=<ADMIN_ROLE_ID>
 ```
 `DISCORD_BOT_TOKEN`: The secret token for the bot. Can be found after creating a new bot at https://discord.com/developers/applications.
 
-`ADMIN_ROLE_ID`: The ID of the roles that should be able to create new CTFs. Simply go to the discord channel, right-click on the role and select "Copy Role ID" to find the value.
+`ADMIN_ROLE_ID`: The ID of the roles that should be able to create new CTFs. Simply go to the discord chanel, right-click on the role and select "Copy Role ID" to find the value.
 
 **NOTE**: More information on how to create a discord bot can be found here: https://discordpy.readthedocs.io/en/stable/discord.html
 
@@ -47,20 +47,20 @@ $> docker compose -f docker-compose-prod.yml up
 The meister bot can be interacted with through discord.
 The following commands are available (and possibly more depending on how often this README is updated).
 
-Arguments surrounded by `<>` are required, arguments surrounded by `[]` are optional. All commands support the use of whitespaces, by surrounding the argument with matching citation marks (`"` or `'`).
+Arguments surrounded by `<>` are required, arguments surrounded by `[]` are optional. All commands support the use of whitespaces, by surrounding the argument with matching citation marks (`"`, `'`, or `”`).
 
 ### Help
 
-Lists all available commands together with their arguments.
+Lists all available commands together with their arguments. A full list of commands can be displayed by providing "all" as the command name.
 
 ```
-meister help
+meister help ["all" | COMMAND-NAME]
 ```
 
 ### New CTF
-Creates a new CTF, and a channel called "discussion" under it.
+Creates a new CTF, and a chanel called "discussion" under it.
 
-If provided, the url, username, and password will be included in the channel topic in the discussion chanel.
+If provided, the url, username, and password will be included in the chanel topic in the discussion chanel.
 ```
 meister new ctf <CTF-NAME> [CTF-URL] [USERNAME] [PASSWORD]
 ```
@@ -78,9 +78,23 @@ meister new chall <CHALL-NAME> [CTF-NAME]
 ### Solve challenge
 Marks a challenge as solved, and accepts an argument for the flag used to solve the challenge.
 
-Solved challenges are named `{challnName}-✅`
+Solved challenges are named `"🚩｜{challnName}"`
 ```
 meister solved <FLAG>
+```
+
+### Unsolve challenge
+Marks a solved challenge as unsolved again.
+
+```
+meister unsolve
+```
+
+### Re-solve challenge
+Solve a previously solved challenge with new flag.
+
+```
+meister resolve <FLAG>
 ```
 
 ### Test access privileges
@@ -93,8 +107,12 @@ Below are the privileges required for each command:
 | new chall   | none   |
 | new ctf     | admin  |
 | solved      | none   |
-| test role   | none   |
+| resolve     | none   |
+| unsolve     | none   |
+| testrole   | none   |
 | help        | none   |
+| ping        | none   |
+| version     | none   |
 
 ```
 meister testrole
@@ -107,4 +125,16 @@ Archives a CTF. This means a couple things:
 - The category is moved down to the other archived CTFs (or the bottom if none exist)
 ```
 meister archive ctf [CTF-NAME]
+```
+
+### Ping
+Pings the bot, which might be useful for debugging. It responds with the time it took to respond in ms.
+```
+meister ping
+```
+
+### Version
+Displays the currently running version of the bot, which might be useful for debugging. It reads the version number from `package.json`.
+```
+meister version
 ```

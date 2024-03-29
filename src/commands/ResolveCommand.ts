@@ -4,10 +4,11 @@ import Command from './BaseCommand';
 import { CtfChannel } from '../CtfChannel';
 import { CtfCategory } from '../CtfCategory';
 
-class SolvedCommand extends Command {
-  commandName = 'solved';
+class ResolvedCommand extends Command {
+  commandName = 'resolve';
   usageHelp = `${meisterPrefix} ${this.commandName} <FLAG>`;
-  commandDescription = 'Solve a challenge given the flag.';
+  commandDescription =
+    'Re-solve a challenge. Useful if you have entered the wrong flag before.';
 
   async execute(
     message: ValidMemberMessage,
@@ -20,25 +21,15 @@ class SolvedCommand extends Command {
     const [flag] = args;
 
     // Check if the command was used in the correct channel
-    commandChannel.assertNotSolved();
-    commandChannel.assertNotInDiscussion();
+    commandChannel.assertSolved();
     commandCategory.assertNotInGeneral();
+    commandChannel.assertNotInDiscussion();
 
-    // Rename the channel and reply to the user
+    // Update the channel name if stuck
     commandChannel.setSolvedName();
 
-    // Notify the participants that the challenge was solved
-    const formattedChallengeParticipants = commandChannel
-      .participatingMembers()
-      .map((member) => `<@${member.id}>`)
-      .join(', ');
-
-    commandChannel.moveToBottom();
-
-    message.reply(
-      `Challenge was solved with flag: \`${flag}\`\n:confetti_ball: Good job ${formattedChallengeParticipants}! :confetti_ball:`,
-    );
+    message.reply(`Challenge was re-solved with flag: \`${flag}\``);
   }
 }
 
-export default SolvedCommand;
+export default ResolvedCommand;

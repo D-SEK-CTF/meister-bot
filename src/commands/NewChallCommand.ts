@@ -1,52 +1,37 @@
-import { CategoryChannel, ChannelType, Client } from 'discord.js';
 import { prefix } from '../const';
-import { getCategoryChannels } from '../utils/getCategoryChannels';
-import { solvedChannelName } from '../utils/solvedChannelName';
 import { ValidMemberMessage } from '../utils/validateMessage';
-import BaseCommand from './BaseCommand';
-import { findChannelByName } from '../utils/findChannelByName';
+import Command from './BaseCommand';
+import { CtfChannel } from '../CtfChannel';
+import { CtfCategory } from '../CtfCategory';
 
-class NewChallCommand extends BaseCommand {
-  private adminRoleId: string;
+class NewChallCommand extends Command {
   commandName = 'new chall';
   usageHelp = `${prefix} ${this.commandName} <CHALL-NAME> [CTF-NAME]`;
+  commandDescription = 'Create a new challenge under a CTF.';
 
-  constructor(client: Client, adminRoleId: string) {
-    super(client);
-    this.adminRoleId = adminRoleId;
-  }
-
-  async execute(message: ValidMemberMessage, args: string[]): Promise<void> {
+  async execute(
+    message: ValidMemberMessage,
+    commandChannel: CtfChannel,
+    commandCategory: CtfCategory,
+    args: string[],
+  ): Promise<void> {
     this.assertArgsLengthRange(args, 1, 2);
-    this.assertNotInGeneralChannel(message);
+    commandCategory.assertNotInGeneral();
+    commandChannel.assertNotChallenge();
 
     const [channelName, ctfName] = args;
 
     const category = ctfName
-      ? findChannelByName(message, ctfName, ChannelType.GuildCategory, true)
-      : message.channel.parent;
-    this.assertValidCategory(category);
-    this.assertChannelDoesNotExist(message, channelName, category);
+      ? CtfCategory.fromName(ctfName, commandCategory.object.guild, true)
+      : CtfCategory.fromMessage(message);
 
-    const newChannel = await message.guild.channels.create({
-      name: channelName,
-      type: ChannelType.GuildText,
-      parent: category.id,
-    });
+    this.assertChannelDoesNotExist(channelName, category);
+
+    const newChannel = await CtfChannel.createChall(channelName, category);
 
     message.reply(
-      `New challenge <#${newChannel.id}> created under \`${category.name}\`.`,
+      `New challenge ${newChannel.ref} created under \`${category.name}\`.`,
     );
-  }
-
-  /**
-   * @param category The category channel
-   * @throws Error if the category is invalid
-   */
-  assertValidCategory(category: CategoryChannel): void {
-    if (!category || category.type !== ChannelType.GuildCategory) {
-      throw new Error('Please use this command inside a category.');
-    }
   }
 
   /**
@@ -54,25 +39,10 @@ class NewChallCommand extends BaseCommand {
    * @param category The category channel
    * @throws Error if the channel already exists
    */
-  assertChannelDoesNotExist(
-    message: ValidMemberMessage,
-    targetChannelName: string,
-    category: CategoryChannel,
-  ): void {
-    const categoryChannels = getCategoryChannels(message, category);
-    const targetChannelNameLower = targetChannelName.toLowerCase();
-
-    const channel = categoryChannels.find((channel) => {
-      const channelNameLower = channel.name.toLowerCase();
-
-      return (
-        channelNameLower === targetChannelNameLower ||
-        channelNameLower === solvedChannelName(targetChannelNameLower)
-      );
-    });
-
+  assertChannelDoesNotExist(channelName: string, category: CtfCategory): void {
+    const channel = CtfChannel.fromName(channelName, category);
     if (channel) {
-      throw new Error(`Challenge <#${channel.id}> already exists.`);
+      throw new Error(`Challenge ${channel.ref} already exists.`);
     }
   }
 }

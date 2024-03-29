@@ -1,19 +1,30 @@
-import { CategoryChannel, Client } from 'discord.js';
+import { Client } from 'discord.js';
 import { ValidMemberMessage } from '../utils/validateMessage';
+import { CtfChannel } from '../CtfChannel';
+import { CtfCategory } from '../CtfCategory';
 
-abstract class BaseCommand {
+abstract class Command {
   client: Client;
+  requiredRole: string | null;
+  showInHelp = true;
   abstract commandName: string;
   abstract usageHelp: string;
+  abstract commandDescription: string;
 
-  constructor(client: Client) {
-    if (new.target === BaseCommand) {
+  constructor(client: Client, requiredRole: string | null) {
+    if (new.target === Command) {
       throw new TypeError('Cannot construct BaseCommand instances directly');
     }
     this.client = client;
+    this.requiredRole = requiredRole;
   }
 
-  abstract execute(message: ValidMemberMessage, args: string[]): Promise<void>;
+  abstract execute(
+    message: ValidMemberMessage,
+    commandChannel: CtfChannel,
+    commandCategory: CtfCategory,
+    args: string[],
+  ): Promise<void>;
 
   /**
    * Handle a user command from a Discord message
@@ -27,10 +38,15 @@ abstract class BaseCommand {
   ): Promise<void> {
     // Ignore the function wrapper, it's just for better error handling
     (async () => {
+      // Check if the user has the required role
+      this.assertHasRequiredRole(message);
+
       // Parse the arguments (split by spaces and respecting quotes)
       const args = this.parseArgs(argString);
+      const channel = CtfChannel.fromMessage(message);
+      const category = CtfCategory.fromMessage(message);
       // Execute the command in each subclass
-      await this.execute(message, args);
+      await this.execute(message, channel, category, args);
     })
       .call(this)
       .catch((error) => {
@@ -52,8 +68,8 @@ abstract class BaseCommand {
    * ```
    */
   parseArgs(content: string): string[] {
-    // Parse the arguments with quotes, both single and double
-    const validQuotes = ["'", '"'];
+    // Parse the arguments with quotes
+    const validQuotes = ["'", '"', '”'];
     let lastQuote = '';
     let currentArg = '';
     const args: string[] = [];
@@ -110,23 +126,14 @@ abstract class BaseCommand {
    * }
    * ```
    */
-  hasRoleId(message: ValidMemberMessage, id: string): boolean {
-    return message.member
-      ? message.member.roles.cache.some((role) => role.id === id)
-      : false;
-  }
+  hasRequiredRole(message: ValidMemberMessage, id?: string): boolean {
+    const targetRole = id ?? this.requiredRole;
 
-  /**
-   * Reply to the message with the usage help
-   *
-   * @param message - Discord message
-   * @example
-   * ```ts
-   * this.sendUsageHelp(message);
-   * ```
-   */
-  sendUsageHelp(message: ValidMemberMessage): void {
-    message.reply(`Usage: ${this.usageHelp}`);
+    if (targetRole === null) return true;
+
+    return message.member
+      ? message.member.roles.cache.some((role) => role.id === targetRole)
+      : false;
   }
 
   /**
@@ -173,47 +180,17 @@ abstract class BaseCommand {
   }
 
   /**
-   * Assert that the message was sent in a challenge channel
-   *
-   * @param message - Discord message
-   * @throws Error if the message was not sent in a challenge channel
-   */
-  assertNotInGeneralChannel(message: ValidMemberMessage): void {
-    if (message.channel.parent.name === 'general') {
-      throw new Error('Please use this command inside a challenge channel.');
-    }
-  }
-
-  assertNotGeneralCategory(category: CategoryChannel): void {
-    if (category.name === 'general') {
-      throw new Error('Please use this command inside a CTF category.');
-    }
-  }
-
-  /**
-   * Assert that the message was sent in a text channel
-   *
-   * @param message - Discord message
-   * @throws Error if the message was not sent in a text channel
-   */
-  assertInTextChannel(message: ValidMemberMessage): void {
-    if (!message.channel.isTextBased()) {
-      throw new Error('This command can only be used in a text channel.');
-    }
-  }
-
-  /**
    * Assert that the message was sent by a user with a specific role
    *
    * @param message - Discord message
    * @param roleId - Role ID
    * @throws Error if the user does not have the role
    */
-  assertHasRole(message: ValidMemberMessage, roleId: string): void {
-    if (!this.hasRoleId(message, roleId)) {
+  assertHasRequiredRole(message: ValidMemberMessage): void {
+    if (!this.hasRequiredRole(message)) {
       throw new Error('You do not have permission to use this command.');
     }
   }
 }
 
-export default BaseCommand;
+export default Command;
